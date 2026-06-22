@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Absolute Hidra CDI Plus — Análise de Substituição</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #f5f5f5;
+      color: #1a1a1a;
+      padding: 32px 16px;
+      line-height: 1.6;
+    }
+
+    .container {
+      max-width: 820px;
+      margin: 0 auto;
+    }
+
+    /* Header */
+    .header {
+      background: #1a1a2e;
+      color: #fff;
+      padding: 28px 32px;
+      border-radius: 10px 10px 0 0;
+    }
+    .header .label {
+      font-size: 11px;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: #8892b0;
+      margin-bottom: 8px;
+    }
+    .header h1 {
+      font-size: 22px;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+    .header .subtitle {
+      font-size: 13px;
+      color: #8892b0;
+    }
+
+    /* Verdict banner */
+    .verdict {
+      background: #0f7a55;
+      color: #fff;
+      padding: 18px 32px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .verdict .icon {
+      font-size: 28px;
+      flex-shrink: 0;
+    }
+    .verdict .text strong {
+      font-size: 18px;
+      display: block;
+    }
+    .verdict .text span {
+      font-size: 13px;
+      opacity: 0.85;
+    }
+
+    /* Card */
+    .card {
+      background: #fff;
+      padding: 28px 32px;
+      border-bottom: 1px solid #e8e8e8;
+    }
+    .card:last-child {
+      border-bottom: none;
+      border-radius: 0 0 10px 10px;
+    }
+    .card h2 {
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: #666;
+      margin-bottom: 16px;
+    }
+
+    /* Key finding highlight */
+    .finding {
+      background: #f0faf5;
+      border-left: 4px solid #0f7a55;
+      padding: 14px 18px;
+      border-radius: 0 6px 6px 0;
+      margin-bottom: 20px;
+      font-size: 15px;
+    }
+    .finding strong {
+      color: #0a5c3e;
+    }
+
+    /* Stat row */
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+    .stat {
+      background: #f9f9f9;
+      border: 1px solid #e8e8e8;
+      border-radius: 8px;
+      padding: 14px 16px;
+      text-align: center;
+    }
+    .stat .value {
+      font-size: 22px;
+      font-weight: 700;
+      color: #1a1a2e;
+    }
+    .stat .value.positive { color: #0f7a55; }
+    .stat .value.negative { color: #c0392b; }
+    .stat .value.neutral  { color: #b8860b; }
+    .stat .meta {
+      font-size: 11px;
+      color: #888;
+      margin-top: 2px;
+    }
+
+    /* Table */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13.5px;
+    }
+    th {
+      background: #f0f0f0;
+      padding: 9px 12px;
+      text-align: left;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      color: #555;
+      border-bottom: 2px solid #ddd;
+    }
+    td {
+      padding: 9px 12px;
+      border-bottom: 1px solid #eee;
+      vertical-align: top;
+    }
+    tr:last-child td { border-bottom: none; }
+
+    .badge {
+      display: inline-block;
+      padding: 2px 9px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 700;
+    }
+    .badge.ok      { background: #d4edda; color: #155724; }
+    .badge.watch   { background: #fff3cd; color: #856404; }
+    .badge.trigger { background: #f8d7da; color: #721c24; }
+
+    /* Bullet list */
+    .reasons {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .reasons li {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+      font-size: 14px;
+    }
+    .reasons li .num {
+      background: #1a1a2e;
+      color: #fff;
+      font-size: 11px;
+      font-weight: 700;
+      border-radius: 50%;
+      width: 22px;
+      height: 22px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    /* Warning box */
+    .caution {
+      background: #fffbf0;
+      border: 1px solid #f0d580;
+      border-radius: 8px;
+      padding: 14px 18px;
+      font-size: 13.5px;
+    }
+    .caution .caution-title {
+      font-weight: 700;
+      color: #8a6800;
+      margin-bottom: 6px;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .caution ul {
+      padding-left: 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    /* Portfolio composition */
+    .comp-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+    .comp-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 13.5px;
+    }
+    .bar-wrap {
+      flex: 1;
+      background: #eee;
+      border-radius: 4px;
+      height: 8px;
+      overflow: hidden;
+    }
+    .bar {
+      height: 100%;
+      border-radius: 4px;
+      background: #1a1a2e;
+    }
+    .bar.green  { background: #0f7a55; }
+    .bar.blue   { background: #2563eb; }
+    .bar.orange { background: #d97706; }
+    .bar.gray   { background: #94a3b8; }
+    .comp-label { width: 120px; font-size: 12px; color: #555; }
+    .comp-pct   { width: 38px; text-align: right; font-weight: 700; font-size: 13px; }
+
+    /* Footer */
+    .footer {
+      margin-top: 10px;
+      font-size: 11px;
+      color: #aaa;
+      text-align: right;
+      padding: 0 4px;
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+
+  <!-- Header -->
+  <div class="header">
+    <div class="label">Carteira Z · Análise de Monitoramento</div>
+    <h1>Absolute Hidra CDI Plus</h1>
+    <div class="subtitle">É o momento de substituir o fundo? · Dados até mai/2026</div>
+  </div>
+
+  <!-- Verdict -->
+  <div class="verdict">
+    <div class="icon">✓</div>
+    <div class="text">
+      <strong>Não substituir — MANTER</strong>
+      <span>Mai/2026 entregou +1,11% (~103% CDI). Nenhum gatilho formal de deterioração foi acionado.</span>
+    </div>
+  </div>
+
+  <!-- Key finding -->
+  <div class="card">
+    <h2>O dado que faltava resolveu a dúvida</h2>
+    <div class="finding">
+      A wiki não tinha o desempenho de maio/2026. A lâmina oficial confirma:
+      <strong>+1,11% em maio (~103% CDI)</strong> — melhor mês desde jan/2026 (+1,80%) e
+      inversão clara do padrão de compressão que durou de fevereiro a abril.
+    </div>
+
+    <div class="stats">
+      <div class="stat">
+        <div class="value positive">+1,11%</div>
+        <div class="meta">Mai/2026 · ~103% CDI</div>
+      </div>
+      <div class="stat">
+        <div class="value neutral">+3,59%</div>
+        <div class="meta">YTD 2026 · 63% CDI</div>
+      </div>
+      <div class="stat">
+        <div class="value">R$ 1,51 bi</div>
+        <div class="meta">PL mai/2026 (FIC)</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Trigger check -->
+  <div class="card">
+    <h2>Checagem dos gatilhos de deterioração</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Gatilho</th>
+          <th>Limiar</th>
+          <th>Situação</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Retorno nominal negativo por 2 meses consecutivos</td>
+          <td>&lt; 0% por 2 meses</td>
+          <td>Abr/26: +0,03% (positivo). Mai/26: +1,11%</td>
+          <td><span class="badge ok">Não acionado</span></td>
+        </tr>
+        <tr>
+          <td>Captação líquida negativa em 1 mês</td>
+          <td>&gt; 10% do PL</td>
+          <td>Abr/26: −R$158mi ≈ −8% do PL</td>
+          <td><span class="badge ok">Não acionado</span></td>
+        </tr>
+        <tr>
+          <td>PL em queda persistente</td>
+          <td>&gt; 3 meses de resgates líquidos</td>
+          <td>PL caiu ~20% (R$1,9bi → R$1,5bi) ao longo do ciclo. Recuperação de retorno em mai/26 deve estabilizar</td>
+          <td><span class="badge watch">Monitorar</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Por que manter -->
+  <div class="card">
+    <h2>Por que a tese de manutenção continua válida</h2>
+    <ul class="reasons">
+      <li>
+        <span class="num">1</span>
+        <span><strong>A tese de 01/05/2026 estava correta.</strong> O diagnóstico era "stress sistêmico de MtM, não perda de crédito estrutural". Maio entregou acima do CDI sem evento adverso adicional.</span>
+      </li>
+      <li>
+        <span class="num">2</span>
+        <span><strong>Carteira estruturalmente íntegra.</strong> 82,4% AAA, 94% AAA+AA. Energia Elétrica em 52,71% — setor mais resiliente no universo de incentivadas. Top 1 = 8,5%: sem concentração destrutiva.</span>
+      </li>
+      <li>
+        <span class="num">3</span>
+        <span><strong>Carrego reconstruído começa a aparecer.</strong> A abertura de spreads durante o ciclo adverso significa que papéis novos entraram pagando mais prêmio. Isso está se refletindo no retorno de maio.</span>
+      </li>
+      <li>
+        <span class="num">4</span>
+        <span><strong>Vantagem fiscal ainda justifica o veículo.</strong> Acumulado desde o início = 92% CDI bruto ÷ 0,85 ≈ <strong>108% CDI equivalente</strong> frente a produto tributado. Isento de IR + sem come-cotas.</span>
+      </li>
+      <li>
+        <span class="num">5</span>
+        <span><strong>Sair agora = cristalizar o ponto de mínimo.</strong> O cotista que resgata renuncia tanto à normalização de spreads quanto ao carrego que já melhorou.</span>
+      </li>
+    </ul>
+  </div>
+
+  <!-- Composição -->
+  <div class="card">
+    <h2>Composição da carteira · mai/2026</h2>
+    <div class="comp-grid">
+      <div>
+        <p style="font-size:12px;font-weight:700;color:#555;margin-bottom:10px;text-transform:uppercase;letter-spacing:.5px;">Por Classe de Ativo</p>
+        <div class="comp-item">
+          <span class="comp-label">Debêntures</span>
+          <div class="bar-wrap"><div class="bar green" style="width:45%"></div></div>
+          <span class="comp-pct">45%</span>
+        </div>
+        <br>
+        <div class="comp-item">
+          <span class="comp-label">Soberano</span>
+          <div class="bar-wrap"><div class="bar blue" style="width:40%"></div></div>
+          <span class="comp-pct">40%</span>
+        </div>
+        <br>
+        <div class="comp-item">
+          <span class="comp-label">Bancários</span>
+          <div class="bar-wrap"><div class="bar orange" style="width:8%"></div></div>
+          <span class="comp-pct">8%</span>
+        </div>
+        <br>
+        <div class="comp-item">
+          <span class="comp-label">FIDC</span>
+          <div class="bar-wrap"><div class="bar gray" style="width:6%"></div></div>
+          <span class="comp-pct">6%</span>
+        </div>
+      </div>
+      <div>
+        <p style="font-size:12px;font-weight:700;color:#555;margin-bottom:10px;text-transform:uppercase;letter-spacing:.5px;">Top Setores</p>
+        <div class="comp-item">
+          <span class="comp-label">Energia Elét.</span>
+          <div class="bar-wrap"><div class="bar green" style="width:52.71%"></div></div>
+          <span class="comp-pct">52,71%</span>
+        </div>
+        <br>
+        <div class="comp-item">
+          <span class="comp-label">Bancos</span>
+          <div class="bar-wrap"><div class="bar blue" style="width:13.34%"></div></div>
+          <span class="comp-pct">13,34%</span>
+        </div>
+        <br>
+        <div class="comp-item">
+          <span class="comp-label">Estruturados</span>
+          <div class="bar-wrap"><div class="bar orange" style="width:9.15%"></div></div>
+          <span class="comp-pct">9,15%</span>
+        </div>
+        <br>
+        <div class="comp-item">
+          <span class="comp-label">Petróleo e Gás</span>
+          <div class="bar-wrap"><div class="bar gray" style="width:8.61%"></div></div>
+          <span class="comp-pct">8,61%</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Ressalvas -->
+  <div class="card">
+    <h2>O que ainda merece atenção</h2>
+    <div class="caution">
+      <div class="caution-title">Pontos a monitorar nos próximos meses</div>
+      <ul>
+        <li><strong>YTD 2026 em 63% CDI</strong> — fevereiro, março e abril deixaram cicatriz no acumulado. Normalização levará mais meses consecutivos acima do CDI.</li>
+        <li><strong>PL caiu ~20%</strong> desde o pico (R$1,9bi → R$1,5bi). Resgates devem desacelerar com a melhora de desempenho, mas a tendência não reverte instantaneamente.</li>
+        <li><strong>Gatilho de PL ainda em observação.</strong> Se os resgates líquidos persistirem por mais de 3 meses após mai/2026, o indicador de monitoramento será formalmente acionado.</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Conclusão -->
+  <div class="card" style="background:#f9fffe; border-top: 2px solid #0f7a55;">
+    <h2>Quando substituir faria sentido</h2>
+    <p style="font-size:14px;">
+      Somente se maio tivesse sido mais um mês próximo de zero ou negativo — o que confirmaria
+      deterioração estrutural, e não sistêmica. <strong>Isso não aconteceu.</strong>
+      O pior já passou, a recuperação está em curso, e os três gatilhos formais de substituição
+      não foram acionados.
+    </p>
+    <p style="font-size:12px; color:#888; margin-top:12px;">
+      Fontes: <code>fundos/hidra-cdi-plus.md</code> · <code>relatorios/2026-05-hidra-cdi-plus-lamina.md</code> ·
+      <code>relatorios/2026-05-01-relatorio-hidra-cdi-plus-stress-abr2026.md</code>
+    </p>
+  </div>
+
+</div>
+
+<div class="footer">Carteira Z Wiki · Gerado em 22/jun/2026</div>
+
+</body>
+</html>
