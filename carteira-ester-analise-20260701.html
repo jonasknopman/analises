@@ -1,0 +1,937 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Análise da Carteira — Ester | Carteira Z</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      font-size: 14px;
+      line-height: 1.6;
+      color: #1a1a2e;
+      background: #f5f7fa;
+    }
+
+    /* ── HEADER ── */
+    .page-header {
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+      color: white;
+      padding: 2rem 2.5rem;
+    }
+    .page-header h1 { font-size: 1.6rem; font-weight: 700; margin-bottom: 0.3rem; }
+    .page-header .subtitle { font-size: 0.85rem; color: #94a3b8; }
+    .page-header .meta { display: flex; gap: 2rem; margin-top: 1rem; font-size: 0.82rem; color: #cbd5e1; }
+    .page-header .meta span strong { color: white; }
+
+    /* ── LAYOUT ── */
+    .container { max-width: 1100px; margin: 0 auto; padding: 1.5rem 1.5rem 3rem; }
+
+    /* ── CARDS SUMMARY ── */
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1rem;
+      margin-bottom: 1.8rem;
+    }
+    .card {
+      background: white;
+      border-radius: 10px;
+      padding: 1.1rem 1.3rem;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+    }
+    .card .label { font-size: 0.75rem; color: #64748b; text-transform: uppercase; letter-spacing: 0.04em; }
+    .card .value { font-size: 1.4rem; font-weight: 700; color: #1a1a2e; margin-top: 0.2rem; }
+    .card .sub { font-size: 0.78rem; color: #64748b; margin-top: 0.1rem; }
+    .card.red .value { color: #dc2626; }
+    .card.orange .value { color: #d97706; }
+    .card.green .value { color: #16a34a; }
+
+    /* ── SECTION ── */
+    section { margin-bottom: 2rem; }
+    section h2 {
+      font-size: 1rem;
+      font-weight: 700;
+      color: #1e3a5f;
+      padding-bottom: 0.5rem;
+      border-bottom: 2px solid #e2e8f0;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    section h2 .icon { font-size: 1.1rem; }
+    .section-card { background: white; border-radius: 10px; padding: 1.3rem; box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
+
+    /* ── TABLE ── */
+    table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+    thead th {
+      background: #f1f5f9;
+      color: #475569;
+      font-size: 0.72rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      padding: 0.6rem 0.8rem;
+      text-align: left;
+      border-bottom: 2px solid #e2e8f0;
+    }
+    tbody td { padding: 0.65rem 0.8rem; border-bottom: 1px solid #f1f5f9; vertical-align: middle; }
+    tbody tr:hover { background: #f8fafc; }
+    .num { text-align: right; font-variant-numeric: tabular-nums; }
+    .center { text-align: center; }
+
+    /* ── BADGE AÇÃO ── */
+    .badge {
+      display: inline-block;
+      padding: 0.2rem 0.6rem;
+      border-radius: 20px;
+      font-size: 0.7rem;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      white-space: nowrap;
+    }
+    .badge-manter   { background: #dcfce7; color: #15803d; }
+    .badge-vender   { background: #fee2e2; color: #b91c1c; }
+    .badge-aguardar { background: #dbeafe; color: #1d4ed8; }
+    .badge-aceitar  { background: #fef3c7; color: #92400e; }
+    .badge-avaliar  { background: #ede9fe; color: #5b21b6; }
+
+    /* ── STATUS dot ── */
+    .status { display: flex; align-items: center; gap: 0.4rem; }
+    .dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+    .dot-green  { background: #16a34a; }
+    .dot-red    { background: #dc2626; }
+    .dot-yellow { background: #d97706; }
+    .dot-blue   { background: #2563eb; }
+
+    /* ── ROW HIGHLIGHT ── */
+    .row-bad    { background: #fff5f5 !important; }
+    .row-warn   { background: #fffbeb !important; }
+    .row-locked { background: #f5f3ff !important; }
+
+    /* ── DIAGNÓSTICO BOXES ── */
+    .diag-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    .diag-item {
+      border-radius: 8px;
+      padding: 1rem 1.1rem;
+      display: flex;
+      gap: 0.8rem;
+      align-items: flex-start;
+    }
+    .diag-item.bad    { background: #fef2f2; border-left: 4px solid #dc2626; }
+    .diag-item.warn   { background: #fffbeb; border-left: 4px solid #f59e0b; }
+    .diag-item.ok     { background: #f0fdf4; border-left: 4px solid #16a34a; }
+    .diag-item .diag-icon { font-size: 1.4rem; }
+    .diag-item h4 { font-size: 0.82rem; font-weight: 700; color: #1a1a2e; margin-bottom: 0.25rem; }
+    .diag-item p  { font-size: 0.78rem; color: #475569; line-height: 1.5; }
+
+    /* ── TIMELINE ── */
+    .timeline { position: relative; padding-left: 2rem; }
+    .timeline::before { content: ''; position: absolute; left: 0.5rem; top: 0; bottom: 0; width: 2px; background: #e2e8f0; }
+    .tl-item { position: relative; margin-bottom: 1.4rem; }
+    .tl-dot {
+      position: absolute;
+      left: -1.75rem;
+      top: 0.15rem;
+      width: 14px; height: 14px;
+      border-radius: 50%;
+      border: 2px solid white;
+      box-shadow: 0 0 0 2px #e2e8f0;
+    }
+    .tl-dot.now    { background: #2563eb; box-shadow: 0 0 0 2px #2563eb; }
+    .tl-dot.soon   { background: #16a34a; box-shadow: 0 0 0 2px #16a34a; }
+    .tl-dot.mid    { background: #d97706; box-shadow: 0 0 0 2px #d97706; }
+    .tl-dot.late   { background: #7c3aed; box-shadow: 0 0 0 2px #7c3aed; }
+    .tl-date { font-size: 0.72rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.06em; }
+    .tl-title { font-size: 0.88rem; font-weight: 700; color: #1a1a2e; margin: 0.1rem 0 0.3rem; }
+    .tl-body { font-size: 0.8rem; color: #475569; }
+    .tl-amount { font-size: 0.8rem; font-weight: 600; color: #1e3a5f; margin-top: 0.2rem; }
+    .tl-actions { margin-top: 0.5rem; display: flex; flex-wrap: wrap; gap: 0.4rem; }
+
+    /* ── FUND CARDS ── */
+    .fund-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    .fund-card {
+      background: white;
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      padding: 1rem 1.2rem;
+      position: relative;
+      overflow: hidden;
+    }
+    .fund-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+    }
+    .fund-card.tier1::before { background: #2563eb; }
+    .fund-card.tier2::before { background: #16a34a; }
+    .fund-card.tier3::before { background: #d97706; }
+    .fund-card h4 { font-size: 0.88rem; font-weight: 700; color: #1a1a2e; margin-bottom: 0.2rem; }
+    .fund-card .fund-gestora { font-size: 0.72rem; color: #64748b; margin-bottom: 0.6rem; }
+    .fund-meta { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-bottom: 0.5rem; }
+    .chip {
+      font-size: 0.7rem;
+      padding: 0.15rem 0.5rem;
+      border-radius: 20px;
+      font-weight: 500;
+    }
+    .chip-blue   { background: #dbeafe; color: #1d4ed8; }
+    .chip-green  { background: #dcfce7; color: #15803d; }
+    .chip-orange { background: #fef3c7; color: #92400e; }
+    .chip-purple { background: #ede9fe; color: #5b21b6; }
+    .fund-desc { font-size: 0.78rem; color: #475569; line-height: 1.5; }
+    .fund-note { font-size: 0.72rem; color: #94a3b8; margin-top: 0.4rem; font-style: italic; }
+    .fund-card .tag-recommended {
+      position: absolute;
+      top: 0.6rem; right: 0.8rem;
+      background: #1e3a5f;
+      color: white;
+      font-size: 0.65rem;
+      font-weight: 700;
+      padding: 0.1rem 0.45rem;
+      border-radius: 3px;
+      letter-spacing: 0.05em;
+    }
+
+    /* ── ALLOCATION TABLE ── */
+    .alloc-bar-wrap { background: #f1f5f9; border-radius: 4px; overflow: hidden; height: 8px; }
+    .alloc-bar { height: 100%; border-radius: 4px; }
+    .bar-blue   { background: #2563eb; }
+    .bar-green  { background: #16a34a; }
+    .bar-orange { background: #d97706; }
+    .bar-purple { background: #7c3aed; }
+    .bar-gray   { background: #94a3b8; }
+
+    /* ── FOOTER ── */
+    footer {
+      background: white;
+      border-top: 1px solid #e2e8f0;
+      padding: 1.2rem 2.5rem;
+      font-size: 0.73rem;
+      color: #94a3b8;
+    }
+    footer strong { color: #64748b; }
+
+    /* ── PRINT / SMALL SCREEN ADJUSTMENTS ── */
+    @media (max-width: 768px) {
+      .summary-grid { grid-template-columns: 1fr 1fr; }
+      .diag-grid    { grid-template-columns: 1fr; }
+      .fund-grid    { grid-template-columns: 1fr; }
+    }
+    @media print {
+      body { background: white; }
+      .section-card { box-shadow: none; border: 1px solid #e2e8f0; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════════ HEADER -->
+<div class="page-header">
+  <h1>Análise de Carteira — Ester</h1>
+  <p class="subtitle">Recomendação de adequação para perfil conservador com liquidez em 2–3 anos</p>
+  <div class="meta">
+    <span>Posição: <strong>29/06/2026</strong></span>
+    <span>Relatório gerado: <strong>01/07/2026</strong></span>
+    <span>Assessor atual: <strong>André Dos Santos Martins (A73452)</strong></span>
+    <span>Conta XP: <strong>3439766</strong></span>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- ═══════════════════════════════════════════════════ SUMÁRIO -->
+  <div class="summary-grid" style="margin-top: 1.5rem;">
+    <div class="card">
+      <div class="label">Patrimônio total</div>
+      <div class="value">R$ 512.398</div>
+      <div class="sub">Total investido: R$ 511.480</div>
+    </div>
+    <div class="card red">
+      <div class="label">Imediatamente inadequado</div>
+      <div class="value">R$ 26.476</div>
+      <div class="sub">IP IPG Ações + Vinland Macro → vender</div>
+    </div>
+    <div class="card green">
+      <div class="label">Libera em set/2026</div>
+      <div class="value">R$ 214.008</div>
+      <div class="sub">3 CDBs + 1 LCI vencendo em set/2026</div>
+    </div>
+    <div class="card orange">
+      <div class="label">Preso além de 2027</div>
+      <div class="value">R$ 102.734</div>
+      <div class="sub">CDB Fev/29, CDB Dez/28, NTN-B Mai/29*</div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════ CARTEIRA ATUAL -->
+  <section>
+    <h2><span class="icon">📋</span> Carteira Atual — Posição 29/06/2026</h2>
+    <div class="section-card" style="padding: 0; overflow: hidden;">
+      <table>
+        <thead>
+          <tr>
+            <th>Ativo</th>
+            <th class="center">Categoria</th>
+            <th class="num">Posição</th>
+            <th class="num">% Carteira</th>
+            <th class="num">Valor Líquido</th>
+            <th class="center">Liquidez</th>
+            <th class="center">Taxa / Retorno</th>
+            <th class="center">Ação</th>
+          </tr>
+        </thead>
+        <tbody>
+
+          <!-- FUNDOS -->
+          <tr style="background:#f8fafc;">
+            <td colspan="8" style="padding:0.5rem 0.8rem; font-size:0.72rem; font-weight:700; color:#475569; text-transform:uppercase; letter-spacing:0.05em; border-bottom:1px solid #e2e8f0;">
+              FUNDOS DE INVESTIMENTO — R$ 126.617 (24,7%)
+            </td>
+          </tr>
+
+          <tr>
+            <td><strong>AZ Quest Low Vol FIF Multimercado RL</strong></td>
+            <td class="center"><span class="chip chip-green">Multimercado baixa vol</span></td>
+            <td class="num">R$ 44.282</td>
+            <td class="num">8,6%</td>
+            <td class="num">R$ 44.178</td>
+            <td class="center">D+1</td>
+            <td class="center">+54,1% líq (ITD)</td>
+            <td class="center"><span class="badge badge-manter">MANTER</span></td>
+          </tr>
+          <tr>
+            <td><strong>Vinland Ativo Advisory FIF RF LP</strong></td>
+            <td class="center"><span class="chip chip-blue">Renda Fixa</span></td>
+            <td class="num">R$ 55.440</td>
+            <td class="num">10,8%</td>
+            <td class="num">R$ 55.340</td>
+            <td class="center">D+1</td>
+            <td class="center">+52,6% líq (ITD)</td>
+            <td class="center"><span class="badge badge-manter">MANTER</span></td>
+          </tr>
+          <tr class="row-bad">
+            <td><strong>Vinland Macro Advisory FIC FIM</strong> <span style="color:#dc2626;font-size:0.7rem;">⚠ Macro</span></td>
+            <td class="center"><span class="chip" style="background:#fee2e2;color:#b91c1c;">Multimercado macro</span></td>
+            <td class="num">R$ 20.194</td>
+            <td class="num">3,9%</td>
+            <td class="num">R$ 20.165</td>
+            <td class="center">D+31</td>
+            <td class="center">+41,2% líq (ITD)</td>
+            <td class="center"><span class="badge badge-vender">VENDER</span></td>
+          </tr>
+          <tr class="row-bad">
+            <td><strong>IP Participações IPG FIC FIF Ações RL</strong> <span style="color:#dc2626;font-size:0.7rem;">🔴 AÇÕES</span></td>
+            <td class="center"><span class="chip" style="background:#fee2e2;color:#b91c1c;">Ações internacionais</span></td>
+            <td class="num">R$ 6.282</td>
+            <td class="num">1,2%</td>
+            <td class="num">R$ 5.984</td>
+            <td class="center">D+32</td>
+            <td class="center">+39,5% líq (ITD)</td>
+            <td class="center"><span class="badge badge-vender">VENDER</span></td>
+          </tr>
+          <tr>
+            <td><strong>Trend Investback FIC FIRF Simples RL</strong></td>
+            <td class="center"><span class="chip chip-blue">Renda Fixa simples</span></td>
+            <td class="num">R$ 419</td>
+            <td class="num">0,1%</td>
+            <td class="num">R$ 416</td>
+            <td class="center">D+1</td>
+            <td class="center">+10,5% líq</td>
+            <td class="center"><span class="badge badge-vender">RESGATAR</span></td>
+          </tr>
+
+          <!-- RF PÓS-FIXADO -->
+          <tr style="background:#f8fafc;">
+            <td colspan="8" style="padding:0.5rem 0.8rem; font-size:0.72rem; font-weight:700; color:#475569; text-transform:uppercase; letter-spacing:0.05em; border-bottom:1px solid #e2e8f0;">
+              RENDA FIXA PÓS-FIXADO — R$ 176.566 (34,4%)
+            </td>
+          </tr>
+
+          <tr>
+            <td><strong>CDB Banco Original — set/2026</strong></td>
+            <td class="center"><span class="chip chip-blue">CDB pós</span></td>
+            <td class="num">R$ 79.333</td>
+            <td class="num">15,5%</td>
+            <td class="num">R$ 76.125</td>
+            <td class="center">Vence 08/set/26</td>
+            <td class="center">113% CDI</td>
+            <td class="center"><span class="badge badge-aguardar">AGUARDAR VTO</span></td>
+          </tr>
+          <tr>
+            <td><strong>CDB C6 Consignado — set/2026</strong></td>
+            <td class="center"><span class="chip chip-blue">CDB pós</span></td>
+            <td class="num">R$ 74.793</td>
+            <td class="num">14,6%</td>
+            <td class="num">R$ 71.074</td>
+            <td class="center">Vence 08/set/26</td>
+            <td class="center">119% CDI</td>
+            <td class="center"><span class="badge badge-aguardar">AGUARDAR VTO</span></td>
+          </tr>
+          <tr>
+            <td><strong>LCA Banco John Deere — jun/2027</strong> <span style="color:#16a34a;font-size:0.7rem;">✓ Isento IR</span></td>
+            <td class="center"><span class="chip chip-green">LCA isento</span></td>
+            <td class="num">R$ 22.479</td>
+            <td class="num">4,4%</td>
+            <td class="num">R$ 22.479</td>
+            <td class="center">Vence 23/jun/27</td>
+            <td class="center">83% CDI s/ IR</td>
+            <td class="center"><span class="badge badge-manter">MANTER</span></td>
+          </tr>
+
+          <!-- RF INFLAÇÃO -->
+          <tr style="background:#f8fafc;">
+            <td colspan="8" style="padding:0.5rem 0.8rem; font-size:0.72rem; font-weight:700; color:#475569; text-transform:uppercase; letter-spacing:0.05em; border-bottom:1px solid #e2e8f0;">
+              RENDA FIXA INFLAÇÃO — R$ 149.709 (29,2%)
+            </td>
+          </tr>
+
+          <tr>
+            <td><strong>CDB C6 Consignado — set/2026</strong></td>
+            <td class="center"><span class="chip chip-orange">CDB IPCA</span></td>
+            <td class="num">R$ 49.341</td>
+            <td class="num">9,6%</td>
+            <td class="num">R$ 47.340</td>
+            <td class="center">Vence 08/set/26</td>
+            <td class="center">IPCA +6,70%</td>
+            <td class="center"><span class="badge badge-aguardar">AGUARDAR VTO</span></td>
+          </tr>
+          <tr>
+            <td><strong>CDB C6 Consignado — mai/2027</strong></td>
+            <td class="center"><span class="chip chip-orange">CDB IPCA</span></td>
+            <td class="num">R$ 36.432</td>
+            <td class="num">7,1%</td>
+            <td class="num">R$ 35.307</td>
+            <td class="center">Vence 17/mai/27</td>
+            <td class="center">IPCA +7,75%</td>
+            <td class="center"><span class="badge badge-manter">MANTER</span></td>
+          </tr>
+          <tr class="row-locked">
+            <td><strong>NTN-B Tesouro IPCA+ — mai/2029</strong> <span style="color:#7c3aed;font-size:0.7rem;">↺ Liq. diária</span></td>
+            <td class="center"><span class="chip chip-purple">Tesouro IPCA+</span></td>
+            <td class="num">R$ 35.930</td>
+            <td class="num">7,0%</td>
+            <td class="num">R$ 36.519</td>
+            <td class="center">Diária (MTM)</td>
+            <td class="center">IPCA +8,52%</td>
+            <td class="center"><span class="badge badge-avaliar">AVALIAR*</span></td>
+          </tr>
+          <tr class="row-locked">
+            <td><strong>CDB C6 Consignado — dez/2028</strong></td>
+            <td class="center"><span class="chip chip-orange">CDB IPCA</span></td>
+            <td class="num">R$ 27.006</td>
+            <td class="num">5,3%</td>
+            <td class="num">R$ 26.605</td>
+            <td class="center">Vence 08/dez/28</td>
+            <td class="center">IPCA +8,20%</td>
+            <td class="center"><span class="badge badge-aceitar">ACEITAR</span></td>
+          </tr>
+
+          <!-- PREFIXADO -->
+          <tr style="background:#f8fafc;">
+            <td colspan="8" style="padding:0.5rem 0.8rem; font-size:0.72rem; font-weight:700; color:#475569; text-transform:uppercase; letter-spacing:0.05em; border-bottom:1px solid #e2e8f0;">
+              RENDA FIXA PREFIXADA — R$ 59.548 (11,6%)
+            </td>
+          </tr>
+
+          <tr class="row-locked">
+            <td><strong>CDB Banco Original — fev/2029</strong></td>
+            <td class="center"><span class="chip" style="background:#f0fdf4;color:#15803d;">CDB prefixado</span></td>
+            <td class="num">R$ 40.078</td>
+            <td class="num">7,8%</td>
+            <td class="num">R$ 39.610</td>
+            <td class="center">Vence 06/fev/29</td>
+            <td class="center">13,77% a.a.</td>
+            <td class="center"><span class="badge badge-aceitar">ACEITAR</span></td>
+          </tr>
+          <tr>
+            <td><strong>LCI Banco Bari — set/2026</strong> <span style="color:#16a34a;font-size:0.7rem;">✓ Isento IR</span></td>
+            <td class="center"><span class="chip chip-green">LCI isento</span></td>
+            <td class="num">R$ 19.470</td>
+            <td class="num">3,8%</td>
+            <td class="num">R$ 19.470</td>
+            <td class="center">Vence 08/set/26</td>
+            <td class="center">9,80% a.a. s/ IR</td>
+            <td class="center"><span class="badge badge-aguardar">AGUARDAR VTO</span></td>
+          </tr>
+
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════ DIAGNÓSTICO -->
+  <section>
+    <h2><span class="icon">🔍</span> Diagnóstico — O que está errado</h2>
+    <div class="diag-grid">
+
+      <div class="diag-item bad">
+        <div class="diag-icon">🔴</div>
+        <div>
+          <h4>IP IPG Ações: fundo de ações em carteira conservadora</h4>
+          <p>O IP Participações IPG FIC FIF Ações é um fundo <strong>internacional de ações</strong> com ~47% em BDRs e exterior. Totalmente incompatível com perfil conservador e prazo de 2–3 anos para compra do imóvel. Uma queda de 20–30% neste fundo seria esperada em cenários adversos — e já aconteceu historicamente. D+32 também dificulta resgate rápido.</p>
+        </div>
+      </div>
+
+      <div class="diag-item bad">
+        <div class="diag-icon">🟠</div>
+        <div>
+          <h4>Vinland Macro: risco incompatível com o perfil</h4>
+          <p>O Vinland Macro Advisory FIC FIM é um fundo <strong>macro global de volatilidade moderada-alta</strong>. Em mar/2026 registrou −1,78% em um único mês. Para uma investidora conservadora que precisa do capital em até 3 anos, a incerteza de retorno deste fundo é inadequada. Um produto de renda fixa com D+1 entregaria certeza muito maior.</p>
+        </div>
+      </div>
+
+      <div class="diag-item warn">
+        <div class="diag-icon">⚠️</div>
+        <div>
+          <h4>Concentração excessiva no C6 Consignado</h4>
+          <p>Há <strong>R$ 187.572</strong> (36,6% do patrimônio) alocados em quatro CDBs diferentes do Banco C6 Consignado S.A. Embora todos os CDBs sejam cobertos pelo FGC (R$ 250k por CPF por instituição), uma concentração tão elevada em único emissor vai contra boas práticas de diversificação de crédito.</p>
+        </div>
+      </div>
+
+      <div class="diag-item warn">
+        <div class="diag-icon">🔒</div>
+        <div>
+          <h4>CDB prefixado de 2029 trava capital crítico</h4>
+          <p>O CDB Original a 13,77% a.a. com vencimento em fev/2029 é <strong>excelente em termos de taxa</strong>, mas cria uma janela de iliquidez justamente quando a Ester pode precisar do capital. A taxa é boa demais para quebrar agora — o caminho correto é garantir que o restante da carteira <em>não</em> repita esse erro de prazo.</p>
+        </div>
+      </div>
+
+      <div class="diag-item ok">
+        <div class="diag-icon">✅</div>
+        <div>
+          <h4>Ponto positivo: grande vencimento em set/2026</h4>
+          <p>Três CDBs e uma LCI vencem em setembro/2026, liberando <strong>~R$ 214.008 líquidos</strong>. Esse é o principal momento de adequação da carteira. A decisão de como reaplicar esse montante determinará o sucesso do plano de liquidez para o apartamento.</p>
+        </div>
+      </div>
+
+      <div class="diag-item ok">
+        <div class="diag-icon">✅</div>
+        <div>
+          <h4>Fundos de baixa volatilidade já presentes</h4>
+          <p>O AZ Quest Low Vol (D+1, +54,1% líquido desde o início) e o Vinland Ativo RF (D+1, +52,6% líquido) são produtos adequados e devem ser mantidos. São líquidos, conservadores e entregaram performance consistente. A Ester já tem o núcleo certo — o problema é o que foi adicionado ao redor.</p>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════ PLANO DE ADEQUAÇÃO -->
+  <section>
+    <h2><span class="icon">🗓️</span> Plano de Adequação — Passo a Passo</h2>
+    <div class="section-card">
+      <div class="timeline">
+
+        <div class="tl-item">
+          <div class="tl-dot now"></div>
+          <div class="tl-date">Julho 2026 — Imediato</div>
+          <div class="tl-title">Eliminar posições inadequadas</div>
+          <div class="tl-body">
+            Solicitar resgate dos dois fundos incompatíveis com o perfil conservador.
+            O dinheiro ficará disponível em D+1 (Vinland Macro) e D+32 (IP IPG).
+          </div>
+          <div class="tl-amount">≈ R$ 26.476 liberados (R$ 20.165 + R$ 6.271 líquidos)</div>
+          <div class="tl-actions">
+            <span class="badge badge-vender">Resgatar: Vinland Macro (D+31)</span>
+            <span class="badge badge-vender">Resgatar: IP IPG Ações (D+32)</span>
+            <span class="badge badge-vender">Resgatar: Trend Investback (D+1, irrisório)</span>
+          </div>
+        </div>
+
+        <div class="tl-item">
+          <div class="tl-dot now"></div>
+          <div class="tl-date">Julho–Agosto 2026</div>
+          <div class="tl-title">Reaplicar os R$ ~26k liberados</div>
+          <div class="tl-body">
+            Redirecionar para produtos conservadores com D≤30 dias. Evitar qualquer CDB com prazo além de 2027.
+          </div>
+          <div class="tl-actions">
+            <span class="badge badge-aguardar">→ MAG Cash 10 ou similar (D+10)</span>
+            <span class="badge badge-aguardar">→ Compass Yield 30 (D+30)</span>
+          </div>
+        </div>
+
+        <div class="tl-item">
+          <div class="tl-dot soon"></div>
+          <div class="tl-date">Setembro 2026 — Principal evento</div>
+          <div class="tl-title">Vencimento de R$ 214.008 em CDBs e LCI</div>
+          <div class="tl-body">
+            Este é o momento mais importante. Quatro posições vencem na mesma data (08/set):
+            CDB Original 113% CDI (R$ 76,1k líq) + CDB C6 119% CDI (R$ 71,1k líq) +
+            CDB C6 IPCA+6,70% (R$ 47,3k líq) + LCI Bari (R$ 19,5k líq, isento).
+            <br><br>
+            <strong>Não travar novamente em CDBs com prazo além de 2027.</strong>
+            Dividir entre produtos conservadores com liquidez ≤60 dias.
+          </div>
+          <div class="tl-amount">R$ 214.008 para reaplicar</div>
+          <div class="tl-actions">
+            <span class="badge badge-aguardar">→ ~40% MAG Cash 10 (D+10)</span>
+            <span class="badge badge-aguardar">→ ~30% Compass Yield 30 (D+30)</span>
+            <span class="badge badge-aguardar">→ ~20% CDII11 via B3 (isento IR)</span>
+            <span class="badge badge-aguardar">→ ~10% reforço AZ Quest / Vinland RF</span>
+          </div>
+        </div>
+
+        <div class="tl-item">
+          <div class="tl-dot mid"></div>
+          <div class="tl-date">Maio–Junho 2027</div>
+          <div class="tl-title">Vencimento de R$ ~57.786 em CDB + LCA</div>
+          <div class="tl-body">
+            LCA John Deere (jun/27, isento IR, R$ 22.479) e CDB C6 IPCA+7,75% (mai/27, R$ 35.307 líq).
+            Ambos aceitáveis em termos de taxa e prazo. Quando vencerem, seguir a mesma política:
+            reaplicar em produtos com D≤60 dias.
+          </div>
+          <div class="tl-amount">R$ 57.786 liberados</div>
+        </div>
+
+        <div class="tl-item">
+          <div class="tl-dot late"></div>
+          <div class="tl-date">Dez/2028 e Fev–Mai/2029</div>
+          <div class="tl-title">Posições presas — aceitar e monitorar</div>
+          <div class="tl-body">
+            CDB C6 IPCA+8,20% (dez/28, R$ 26,6k), CDB Original 13,77% a.a. (fev/29, R$ 39,6k)
+            e NTN-B IPCA+8,52% (mai/29, liquidez diária a preço de mercado, R$ 36,5k).
+            <br><br>
+            As taxas são excelentes. A NTN-B pode ser vendida antes do vencimento via Tesouro Direto
+            se necessário (com risco de marcação a mercado). Verificar com a assessoria se convém
+            antecipar a liquidação dependendo do timing da compra do imóvel.
+          </div>
+          <div class="tl-amount">R$ 102.734 (preso, mas com boas taxas)</div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════ FUNDOS RECOMENDADOS -->
+  <section>
+    <h2><span class="icon">💡</span> Fundos Recomendados para Reaplicação</h2>
+    <p style="font-size:0.82rem; color:#475569; margin-bottom:1rem;">
+      Seleção baseada no universo monitorado pela Carteira Z, com foco em
+      <strong>conservadorismo, liquidez D≤60 e baixa volatilidade</strong>.
+      Verificar disponibilidade e condições atuais na plataforma XP antes de aplicar.
+    </p>
+    <div class="fund-grid">
+
+      <div class="fund-card tier1">
+        <span class="tag-recommended">PRIORIDADE 1</span>
+        <h4>MAG Cash 10</h4>
+        <div class="fund-gestora">MAG Investimentos / Sérgio Machado</div>
+        <div class="fund-meta">
+          <span class="chip chip-blue">D+10</span>
+          <span class="chip chip-green">~105% CDI</span>
+          <span class="chip chip-green">Público geral</span>
+          <span class="chip chip-green">0 meses negativos</span>
+        </div>
+        <div class="fund-desc">
+          Fundo de caixa com gestão ativa: captura alfa via operações a termo e LFs bancárias,
+          convergindo ao CDI defensivamente quando prêmios se comprimem.
+          Acumulado desde set/2022: <strong>+60,98% (105% CDI)</strong>. 45 de 45 meses positivos.
+          PL R$ 2,15 bi. Taxa: verificar.
+          <br><br>
+          <strong>Por que para Ester:</strong> é o "caixa inteligente" ideal para o dinheiro que
+          vai ser usado no apartamento. Mantém liquidez em D+10 com retorno superior ao CDI,
+          sem risco de crédito privado relevante.
+        </div>
+        <div class="fund-note">Verificar disponibilidade e CNPJ atual na plataforma XP.</div>
+      </div>
+
+      <div class="fund-card tier1">
+        <span class="tag-recommended">PRIORIDADE 1</span>
+        <h4>Compass Yield 30 (Vinci Compass)</h4>
+        <div class="fund-gestora">Vinci Partners — Crédito Privado High Grade</div>
+        <div class="fund-meta">
+          <span class="chip chip-blue">D+30</span>
+          <span class="chip chip-green">CDI +2,16%</span>
+          <span class="chip chip-green">Público geral</span>
+          <span class="chip chip-orange">Crédito privado</span>
+        </div>
+        <div class="fund-desc">
+          Fundo de crédito privado high grade com histórico de 71 meses.
+          Drawdown máximo histórico: <strong>−0,51%</strong>.
+          100% das janelas ≥24 meses acima do CDI. Carrego CDI+2,16%.
+          <br><br>
+          <strong>Por que para Ester:</strong> entrega CDI+2% com volatilidade muito baixa e
+          drawdown máximo irrisório. Adequado para a parcela que pode esperar 30 dias de resgate.
+          Não é para o dinheiro "de emergência", mas para a maior parte do portfólio reformado.
+        </div>
+        <div class="fund-note">Verificar disponibilidade na XP. Vinci tem boa presença nas plataformas.</div>
+      </div>
+
+      <div class="fund-card tier2">
+        <span class="tag-recommended">PRIORIDADE 2</span>
+        <h4>CDII11 — Sparta Infra CDI</h4>
+        <div class="fund-gestora">Sparta Investimentos — FI-Infra listado na B3</div>
+        <div class="fund-meta">
+          <span class="chip chip-green">Liquidez B3</span>
+          <span class="chip chip-purple">Isento IR (PF)</span>
+          <span class="chip chip-blue">Meta CDI +2%</span>
+          <span class="chip chip-green">Sem come-cotas</span>
+        </div>
+        <div class="fund-desc">
+          FI-Infra listado em bolsa (ticker CDII11). Isento de IR para pessoas físicas e sem come-cotas.
+          Acumulado desde fev/2023: <strong>+66,6% (137% CDI)</strong>. PL R$ 2,8 bi, 71 mil cotistas.
+          Liquidez via B3 (pode vender qualquer dia de pregão).
+          <br><br>
+          <strong>Por que para Ester:</strong> a isenção de IR é o diferencial. Equivale a um retorno
+          bruto de ~CDI+3,5% para quem pagaria 15% de IR. Adequado como parte do portfólio após
+          set/2026. Cotação pode variar, mas spread é pequeno e liquidez é alta.
+        </div>
+        <div class="fund-note">Disponível via conta de investimentos XP — comprar como se fosse ação/ETF. Verificar spread bid/ask antes de operar.</div>
+      </div>
+
+      <div class="fund-card tier2">
+        <h4>AZ Quest Low Vol FIF Multimercado RL</h4>
+        <div class="fund-gestora">AZ Quest — Multimercado Baixa Volatilidade</div>
+        <div class="fund-meta">
+          <span class="chip chip-blue">D+1</span>
+          <span class="chip chip-green">Já na carteira</span>
+          <span class="chip chip-orange">Multimercado</span>
+        </div>
+        <div class="fund-desc">
+          Já presente na carteira com excelente desempenho (+54,1% líquido ITD) e liquidez D+1.
+          Fundo de baixa volatilidade projetado exatamente para perfis conservadores.
+          <br><br>
+          <strong>Ação:</strong> <strong>MANTER e possivelmente aumentar</strong> com parte do dinheiro
+          que vai ser liberado. É um dos melhores produtos já presentes na carteira.
+        </div>
+        <div class="fund-note">Verificar se há limitação de aporte mínimo para novos valores.</div>
+      </div>
+
+      <div class="fund-card tier3">
+        <h4>Vinland Ativo Advisory FIF RF LP</h4>
+        <div class="fund-gestora">Vinland Capital — Renda Fixa</div>
+        <div class="fund-meta">
+          <span class="chip chip-blue">D+1</span>
+          <span class="chip chip-green">Já na carteira</span>
+          <span class="chip chip-blue">Renda Fixa</span>
+        </div>
+        <div class="fund-desc">
+          Fundo de renda fixa com retorno líquido de +52,6% ITD e liquidez D+1.
+          Diferente do Vinland Macro (que deve ser vendido), este é um produto conservador e adequado.
+          <br><br>
+          <strong>Ação:</strong> <strong>MANTER</strong>. Atenção para não confundir com o Vinland Macro —
+          são produtos com estratégias completamente diferentes apesar de mesma gestora.
+        </div>
+        <div class="fund-note">Confirmar com a assessoria que este é o fundo RF (não o macro).</div>
+      </div>
+
+      <div class="fund-card tier3">
+        <h4>NTN-B Tesouro IPCA+ Mai/2029</h4>
+        <div class="fund-gestora">Tesouro Nacional — Já na carteira</div>
+        <div class="fund-meta">
+          <span class="chip chip-purple">Liquidez diária (MTM)</span>
+          <span class="chip chip-orange">IPCA +8,52%</span>
+          <span class="chip chip-blue">Tesouro Direto</span>
+        </div>
+        <div class="fund-desc">
+          Taxa de IPCA+8,52% é excelente e historicamente elevada. Tem liquidez diária via Tesouro Direto,
+          mas ao preço de mercado — se os juros reais subirem mais, o valor de resgate antecipado pode ser
+          menor que o esperado.
+          <br><br>
+          <strong>Ação sugerida:</strong> AVALIAR conforme o timing da compra do imóvel. Se precisar do
+          dinheiro antes de mai/2029, verificar se o preço de mercado está favorável. Se a compra for
+          confirmada para 2027–2028, considerar vender uma parte para garantir o capital sem risco de MTM.
+        </div>
+        <div class="fund-note">* Consultar tabela de IR (hoje ~15% para prazo >2 anos) e verificar preço antes de resgatar antecipadamente.</div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════ CARTEIRA ALVO -->
+  <section>
+    <h2><span class="icon">🎯</span> Carteira Alvo — Após Adequação (pós set/2026)</h2>
+    <p style="font-size:0.82rem; color:#475569; margin-bottom:1rem;">
+      Alocação sugerida após o vencimento dos CDBs de set/2026 e reaplicação dos resgates imediatos.
+      Valores aproximados, baseados na posição atual.
+    </p>
+    <div class="section-card">
+      <table>
+        <thead>
+          <tr>
+            <th>Ativo</th>
+            <th class="center">Liquidez</th>
+            <th class="center">Risco</th>
+            <th class="num">Valor estimado</th>
+            <th class="num">% Alvo</th>
+            <th class="center">Alocação visual</th>
+          </tr>
+        </thead>
+        <tbody>
+
+          <tr>
+            <td>
+              <strong>MAG Cash 10</strong><br>
+              <span style="font-size:0.75rem;color:#64748b;">Caixa conservador — principal reserva para imóvel</span>
+            </td>
+            <td class="center"><span class="chip chip-blue">D+10</span></td>
+            <td class="center"><span class="chip chip-green">Mínimo</span></td>
+            <td class="num"><strong>~R$ 110.000</strong></td>
+            <td class="num"><strong>21%</strong></td>
+            <td style="min-width:120px;">
+              <div class="alloc-bar-wrap"><div class="alloc-bar bar-blue" style="width:21%"></div></div>
+            </td>
+          </tr>
+
+          <tr>
+            <td>
+              <strong>Compass Yield 30</strong><br>
+              <span style="font-size:0.75rem;color:#64748b;">Crédito high grade — retorno CDI+2%</span>
+            </td>
+            <td class="center"><span class="chip chip-blue">D+30</span></td>
+            <td class="center"><span class="chip chip-green">Baixo</span></td>
+            <td class="num"><strong>~R$ 90.000</strong></td>
+            <td class="num"><strong>18%</strong></td>
+            <td>
+              <div class="alloc-bar-wrap"><div class="alloc-bar bar-green" style="width:18%"></div></div>
+            </td>
+          </tr>
+
+          <tr>
+            <td>
+              <strong>CDII11 — Sparta Infra CDI</strong><br>
+              <span style="font-size:0.75rem;color:#64748b;">FI-Infra listado — isento IR para PF</span>
+            </td>
+            <td class="center"><span class="chip chip-green">Liq. B3</span></td>
+            <td class="center"><span class="chip chip-green">Baixo</span></td>
+            <td class="num"><strong>~R$ 55.000</strong></td>
+            <td class="num"><strong>11%</strong></td>
+            <td>
+              <div class="alloc-bar-wrap"><div class="alloc-bar bar-purple" style="width:11%"></div></div>
+            </td>
+          </tr>
+
+          <tr>
+            <td>
+              <strong>AZ Quest Low Vol</strong><br>
+              <span style="font-size:0.75rem;color:#64748b;">Multimercado baixa vol — já na carteira</span>
+            </td>
+            <td class="center"><span class="chip chip-blue">D+1</span></td>
+            <td class="center"><span class="chip chip-green">Baixo</span></td>
+            <td class="num"><strong>~R$ 55.000</strong></td>
+            <td class="num"><strong>11%</strong></td>
+            <td>
+              <div class="alloc-bar-wrap"><div class="alloc-bar bar-blue" style="width:11%"></div></div>
+            </td>
+          </tr>
+
+          <tr>
+            <td>
+              <strong>Vinland Ativo RF</strong><br>
+              <span style="font-size:0.75rem;color:#64748b;">Renda fixa — já na carteira</span>
+            </td>
+            <td class="center"><span class="chip chip-blue">D+1</span></td>
+            <td class="center"><span class="chip chip-green">Baixo</span></td>
+            <td class="num"><strong>~R$ 55.000</strong></td>
+            <td class="num"><strong>11%</strong></td>
+            <td>
+              <div class="alloc-bar-wrap"><div class="alloc-bar bar-green" style="width:11%"></div></div>
+            </td>
+          </tr>
+
+          <tr style="background:#f5f3ff;">
+            <td>
+              <strong>CDB C6 Consignado — mai/2027 + LCA JD jun/2027</strong><br>
+              <span style="font-size:0.75rem;color:#64748b;">Vence dentro do prazo — IPCA+7,75% e 83% CDI isento</span>
+            </td>
+            <td class="center"><span class="chip chip-orange">Vence 2027</span></td>
+            <td class="center"><span class="chip chip-green">Baixo</span></td>
+            <td class="num"><strong>~R$ 57.800</strong></td>
+            <td class="num"><strong>11%</strong></td>
+            <td>
+              <div class="alloc-bar-wrap"><div class="alloc-bar bar-orange" style="width:11%"></div></div>
+            </td>
+          </tr>
+
+          <tr style="background:#f5f3ff;">
+            <td>
+              <strong>NTN-B Mai/2029 + CDB C6 Dez/2028 + CDB Original Fev/2029</strong><br>
+              <span style="font-size:0.75rem;color:#64748b;">Locked — taxas excelentes; NTN-B tem liquidez diária</span>
+            </td>
+            <td class="center"><span class="chip chip-purple">2028–2029</span></td>
+            <td class="center"><span class="chip chip-orange">Iliquidez</span></td>
+            <td class="num"><strong>~R$ 102.700</strong></td>
+            <td class="num"><strong>20%</strong></td>
+            <td>
+              <div class="alloc-bar-wrap"><div class="alloc-bar bar-gray" style="width:20%"></div></div>
+            </td>
+          </tr>
+
+          <tr style="background:#f1f5f9; font-weight:700;">
+            <td colspan="3"><strong>TOTAL</strong></td>
+            <td class="num"><strong>~R$ 525.500</strong></td>
+            <td class="num"><strong>100%</strong></td>
+            <td></td>
+          </tr>
+
+        </tbody>
+      </table>
+
+      <div style="margin-top:1.2rem; padding: 1rem; background:#f0f9ff; border-radius:8px; border-left:4px solid #0284c7;">
+        <p style="font-size:0.82rem; color:#0c4a6e; line-height:1.6;">
+          <strong>Liquidez total pós-adequação (D≤30 dias):</strong>
+          MAG Cash 10 + AZ Quest Low Vol + Vinland Ativo RF + CDII11 ≈ <strong>R$ 315.000 (60%)</strong><br>
+          <strong>Liquidez até 30 dias adicionais:</strong> Compass Yield 30 ≈ <strong>R$ 90.000 (17%)</strong><br>
+          <strong>Disponível até jun/2027:</strong> vencimentos 2027 ≈ + R$ 57.800<br>
+          <strong>Total disponível até jun/2027:</strong> ≈ <strong>R$ 462.000 (88%)</strong>
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════ ALERTAS FINAIS -->
+  <section>
+    <h2><span class="icon">⚡</span> Pontos de Atenção — Antes de Agir</h2>
+    <div class="section-card">
+      <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:1rem;">
+
+        <div style="padding:0.9rem; background:#fef2f2; border-radius:8px;">
+          <div style="font-size:0.78rem; font-weight:700; color:#b91c1c; margin-bottom:0.4rem;">🚫 Não fazer</div>
+          <ul style="font-size:0.78rem; color:#7f1d1d; padding-left:1.1rem; line-height:1.7;">
+            <li>Não aplicar em novos CDBs com vencimento além de 2027</li>
+            <li>Não aplicar em fundos de ações ou multimercado agressivo</li>
+            <li>Não concentrar mais no C6 Consignado (já é 36% da carteira)</li>
+            <li>Não deixar o dinheiro de set/2026 parado sem reinvestir</li>
+          </ul>
+        </div>
+
+        <div style="padding:0.9rem; background:#f0fdf4; border-radius:8px;">
+          <div style="font-size:0.78rem; font-weight:700; color:#15803d; margin-bottom:0.4rem;">✅ Fazer</div>
+          <ul style="font-size:0.78rem; color:#14532d; padding-left:1.1rem; line-height:1.7;">
+            <li>Solicitar o resgate do IP IPG Ações agora (D+32)</li>
+            <li>Solicitar o resgate do Vinland Macro agora (D+31)</li>
+            <li>Em set/2026, aplicar em produtos com D≤60 dias</li>
+            <li>Manter AZ Quest Low Vol e Vinland Ativo RF</li>
+          </ul>
+        </div>
+
+        <div style="padding:0.9rem; background:#fffbeb; border-radius:8px;">
+          <div style="font-size:0.78rem; font-weight:700; color:#92400e; margin-bottom:0.4rem;">⚠️ Verificar</div>
+          <ul style="font-size:0.78rem; color:#78350f; padding-left:1.1rem; line-height:1.7;">
+            <li>Disponibilidade do MAG Cash 10 na XP</li>
+            <li>Disponibilidade do Compass Yield 30 na XP</li>
+            <li>Preço de mercado da NTN-B 2029 (antes de vender)</li>
+            <li>Custo de IOF sobre VGBL se aplicável (não se aplica aqui)</li>
+          </ul>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+</div><!-- /container -->
+
+<footer>
+  <strong>Carteira Z</strong> · Análise gerada em 01/07/2026 com base na posição de 29/06/2026 ·
+  Conta XP 3439766 · Não constitui oferta ou recomendação formal de investimento ·
+  Verificar disponibilidade e condições atuais dos produtos antes de operar ·
+  Fundos com liquidez em dias úteis (D+N = dias úteis, não corridos)
+</footer>
+
+</body>
+</html>
