@@ -1,0 +1,978 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Análise — Barracuda FIM | Carteira Z | Jul/2026</title>
+<style>
+  :root {
+    --bg: #0f1117;
+    --surface: #1a1d27;
+    --surface2: #222636;
+    --border: #2e3347;
+    --accent: #4f8ef7;
+    --accent2: #7c6af7;
+    --green: #34d399;
+    --red: #f87171;
+    --yellow: #fbbf24;
+    --orange: #fb923c;
+    --text: #e2e8f0;
+    --muted: #94a3b8;
+    --card-shadow: 0 4px 24px rgba(0,0,0,0.4);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    font-size: 15px;
+    line-height: 1.65;
+    padding: 0 0 80px 0;
+  }
+
+  /* HEADER */
+  .page-header {
+    background: linear-gradient(135deg, #1a1d27 0%, #12151f 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 48px 64px 40px;
+    position: relative;
+    overflow: hidden;
+  }
+  .page-header::before {
+    content: '';
+    position: absolute;
+    top: -60px; right: -60px;
+    width: 280px; height: 280px;
+    background: radial-gradient(circle, rgba(79,142,247,0.12) 0%, transparent 70%);
+    border-radius: 50%;
+  }
+  .header-tag {
+    display: inline-block;
+    background: rgba(79,142,247,0.15);
+    border: 1px solid rgba(79,142,247,0.35);
+    color: var(--accent);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    padding: 4px 12px;
+    border-radius: 4px;
+    margin-bottom: 16px;
+  }
+  .page-header h1 {
+    font-size: 34px;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+    color: #fff;
+    margin-bottom: 10px;
+  }
+  .page-header .subtitle {
+    color: var(--muted);
+    font-size: 15px;
+  }
+  .page-header .subtitle strong { color: var(--text); }
+  .meta-row {
+    display: flex;
+    gap: 28px;
+    margin-top: 28px;
+    flex-wrap: wrap;
+  }
+  .meta-item { display: flex; flex-direction: column; gap: 3px; }
+  .meta-item .label {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .meta-item .value {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  /* LAYOUT */
+  .container { max-width: 1100px; margin: 0 auto; padding: 0 64px; }
+
+  /* SECTIONS */
+  section {
+    margin-top: 52px;
+  }
+  .section-title {
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 1.8px;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .section-title::before {
+    content: '';
+    display: inline-block;
+    width: 3px;
+    height: 14px;
+    background: var(--accent);
+    border-radius: 2px;
+  }
+
+  /* KPI CARDS */
+  .kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+    gap: 16px;
+    margin-bottom: 8px;
+  }
+  .kpi-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    position: relative;
+    overflow: hidden;
+  }
+  .kpi-card::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+  }
+  .kpi-card.green::after { background: var(--green); }
+  .kpi-card.blue::after { background: var(--accent); }
+  .kpi-card.purple::after { background: var(--accent2); }
+  .kpi-card.yellow::after { background: var(--yellow); }
+  .kpi-card.orange::after { background: var(--orange); }
+  .kpi-label {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 10px;
+  }
+  .kpi-value {
+    font-size: 28px;
+    font-weight: 800;
+    letter-spacing: -1px;
+    color: #fff;
+    line-height: 1;
+  }
+  .kpi-value.green { color: var(--green); }
+  .kpi-value.yellow { color: var(--yellow); }
+  .kpi-sub {
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 6px;
+  }
+
+  /* TWO-COL */
+  .two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+  }
+  @media (max-width: 750px) { .two-col { grid-template-columns: 1fr; } }
+
+  /* ANALYSIS CARD */
+  .analysis-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px;
+  }
+  .analysis-card h3 {
+    font-size: 13px;
+    font-weight: 700;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    padding: 3px 8px;
+    border-radius: 4px;
+  }
+  .tag.green { background: rgba(52,211,153,0.15); color: var(--green); border: 1px solid rgba(52,211,153,0.3); }
+  .tag.red { background: rgba(248,113,113,0.15); color: var(--red); border: 1px solid rgba(248,113,113,0.3); }
+  .tag.yellow { background: rgba(251,191,36,0.15); color: var(--yellow); border: 1px solid rgba(251,191,36,0.3); }
+  .tag.orange { background: rgba(251,146,60,0.15); color: var(--orange); border: 1px solid rgba(251,146,60,0.3); }
+  .tag.blue { background: rgba(79,142,247,0.15); color: var(--accent); border: 1px solid rgba(79,142,247,0.3); }
+
+  .item-list { list-style: none; display: flex; flex-direction: column; gap: 12px; }
+  .item-list li {
+    padding: 12px 14px;
+    border-radius: 8px;
+    background: var(--surface2);
+    border-left: 3px solid transparent;
+    font-size: 14px;
+    line-height: 1.5;
+  }
+  .item-list li.force { border-left-color: var(--green); }
+  .item-list li.weakness { border-left-color: var(--red); }
+  .item-list li.warning { border-left-color: var(--yellow); }
+  .item-list li.attention { border-left-color: var(--orange); }
+  .item-list li strong { display: block; font-size: 13px; margin-bottom: 4px; }
+  .item-list li.force strong { color: var(--green); }
+  .item-list li.weakness strong { color: var(--red); }
+  .item-list li.warning strong { color: var(--yellow); }
+  .item-list li.attention strong { color: var(--orange); }
+
+  /* TABLE */
+  .table-wrap { overflow-x: auto; }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+  thead tr { border-bottom: 1px solid var(--border); }
+  thead th {
+    text-align: left;
+    padding: 10px 14px;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--muted);
+    white-space: nowrap;
+  }
+  tbody tr { border-bottom: 1px solid var(--border); }
+  tbody tr:last-child { border-bottom: none; }
+  tbody tr:hover { background: var(--surface2); }
+  tbody td {
+    padding: 11px 14px;
+    color: var(--text);
+  }
+  td.num { text-align: right; font-variant-numeric: tabular-nums; font-weight: 600; }
+  td.green { color: var(--green); }
+  td.yellow { color: var(--yellow); }
+  td.muted { color: var(--muted); font-style: italic; }
+  td.highlight { color: #fff; font-weight: 700; }
+
+  /* PERFORMANCE BARS */
+  .perf-bar-wrap { display: flex; flex-direction: column; gap: 14px; }
+  .perf-bar-item {}
+  .perf-bar-label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    color: var(--muted);
+    margin-bottom: 6px;
+  }
+  .perf-bar-label span:last-child { color: var(--text); font-weight: 700; }
+  .perf-bar-track {
+    height: 6px;
+    background: var(--surface2);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+  .perf-bar-fill {
+    height: 100%;
+    border-radius: 4px;
+    background: var(--accent);
+    transition: width 0.3s ease;
+  }
+  .perf-bar-fill.green { background: var(--green); }
+  .perf-bar-fill.yellow { background: var(--yellow); }
+  .perf-bar-fill.red { background: var(--red); }
+
+  /* COMPARISON BOX */
+  .compare-box {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 28px;
+    border-top: 3px solid var(--accent2);
+  }
+  .compare-box h3 {
+    font-size: 16px;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 6px;
+  }
+  .compare-box .intro {
+    color: var(--muted);
+    font-size: 13px;
+    margin-bottom: 24px;
+    line-height: 1.6;
+  }
+  .compare-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-bottom: 24px;
+  }
+  .compare-side { background: var(--surface2); border-radius: 10px; padding: 18px; }
+  .compare-side .fund-name {
+    font-size: 13px;
+    font-weight: 800;
+    margin-bottom: 14px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border);
+  }
+  .compare-side .fund-name.blue { color: var(--accent); }
+  .compare-side .fund-name.purple { color: var(--accent2); }
+  .compare-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    padding: 5px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+  }
+  .compare-row:last-child { border-bottom: none; }
+  .compare-row .cr-label { color: var(--muted); }
+  .compare-row .cr-val { font-weight: 600; color: var(--text); }
+  .verdict-box {
+    background: rgba(124,106,247,0.08);
+    border: 1px solid rgba(124,106,247,0.25);
+    border-radius: 10px;
+    padding: 18px;
+  }
+  .verdict-box h4 {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--accent2);
+    margin-bottom: 10px;
+  }
+  .verdict-box p { font-size: 13px; line-height: 1.7; color: var(--text); }
+
+  /* GESTORA */
+  .gestora-grid {
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    gap: 20px;
+  }
+  @media (max-width: 700px) { .gestora-grid { grid-template-columns: 1fr; } }
+  .info-block {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 22px;
+  }
+  .info-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 13px;
+  }
+  .info-row:last-child { border-bottom: none; }
+  .info-row .ir-label { color: var(--muted); }
+  .info-row .ir-val { color: var(--text); font-weight: 600; text-align: right; max-width: 60%; }
+
+  /* STRATEGY */
+  .strategy-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px;
+  }
+  .strategy-pillars {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+    margin-top: 20px;
+  }
+  @media (max-width: 700px) { .strategy-pillars { grid-template-columns: 1fr; } }
+  .pillar {
+    background: var(--surface2);
+    border-radius: 10px;
+    padding: 18px;
+  }
+  .pillar .pillar-num {
+    width: 28px; height: 28px;
+    background: rgba(79,142,247,0.15);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; font-weight: 800;
+    color: var(--accent);
+    margin-bottom: 12px;
+  }
+  .pillar h4 { font-size: 13px; font-weight: 700; color: #fff; margin-bottom: 8px; }
+  .pillar p { font-size: 12px; color: var(--muted); line-height: 1.6; }
+
+  /* FOOTER */
+  .footer {
+    margin-top: 72px;
+    padding: 28px 64px;
+    border-top: 1px solid var(--border);
+    color: var(--muted);
+    font-size: 12px;
+    text-align: center;
+  }
+
+  /* VERDICT */
+  .verdict-row {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  .verdict-item {
+    flex: 1;
+    min-width: 200px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 18px;
+  }
+  .verdict-item .vi-label {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 10px;
+  }
+  .verdict-item .vi-text {
+    font-size: 13px;
+    line-height: 1.6;
+    color: var(--text);
+  }
+  .verdict-item.positive { border-top: 2px solid var(--green); }
+  .verdict-item.caution { border-top: 2px solid var(--yellow); }
+  .verdict-item.negative { border-top: 2px solid var(--red); }
+
+  /* CALLOUT */
+  .callout {
+    border-radius: 10px;
+    padding: 16px 20px;
+    font-size: 13px;
+    line-height: 1.6;
+    margin-top: 16px;
+  }
+  .callout.info {
+    background: rgba(79,142,247,0.08);
+    border: 1px solid rgba(79,142,247,0.25);
+    color: #a5c4fb;
+  }
+  .callout.warn {
+    background: rgba(251,191,36,0.07);
+    border: 1px solid rgba(251,191,36,0.25);
+    color: #fde68a;
+  }
+  .callout.danger {
+    background: rgba(248,113,113,0.07);
+    border: 1px solid rgba(248,113,113,0.25);
+    color: #fca5a5;
+  }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="page-header">
+  <div class="header-tag">Análise de Fundo — Carteira Z</div>
+  <h1>Barracuda FIM</h1>
+  <p class="subtitle">
+    <strong>CNPJ 54.030.009/0001-74</strong> &nbsp;·&nbsp; Multimercado Trading Sistemático &nbsp;·&nbsp;
+    Gestor: <strong>Rio Performance Gestão de Recursos</strong>
+  </p>
+  <div class="meta-row">
+    <div class="meta-item">
+      <span class="label">Data do Relatório</span>
+      <span class="value">07 de julho de 2026</span>
+    </div>
+    <div class="meta-item">
+      <span class="label">Início do Fundo</span>
+      <span class="value">12/03/2024</span>
+    </div>
+    <div class="meta-item">
+      <span class="label">Histórico Analisado</span>
+      <span class="value">27 meses (mar/2024 – mai/2026)</span>
+    </div>
+    <div class="meta-item">
+      <span class="label">Status</span>
+      <span class="value" style="color: var(--yellow);">Em análise — candidato à carteira</span>
+    </div>
+    <div class="meta-item">
+      <span class="label">Contexto</span>
+      <span class="value">Substituição do Ouro Preto Real</span>
+    </div>
+  </div>
+</div>
+
+<div class="container">
+
+<!-- NÚMEROS-CHAVE -->
+<section>
+  <div class="section-title">Números-chave</div>
+  <div class="kpi-grid">
+    <div class="kpi-card green">
+      <div class="kpi-label">Acumulado desde início</div>
+      <div class="kpi-value green">+50,3%</div>
+      <div class="kpi-sub">CDI no período: +31,2%</div>
+    </div>
+    <div class="kpi-card blue">
+      <div class="kpi-label">% do CDI (acumulado)</div>
+      <div class="kpi-value">161%</div>
+      <div class="kpi-sub">mar/2024 – mai/2026</div>
+    </div>
+    <div class="kpi-card green">
+      <div class="kpi-label">Rentabilidade 2025</div>
+      <div class="kpi-value green">+24,0%</div>
+      <div class="kpi-sub">167,6% do CDI</div>
+    </div>
+    <div class="kpi-card purple">
+      <div class="kpi-label">Meses negativos</div>
+      <div class="kpi-value" style="color: var(--green);">0 / 27</div>
+      <div class="kpi-sub">Pior mês: +0,26%</div>
+    </div>
+    <div class="kpi-card yellow">
+      <div class="kpi-label">Volatilidade (desde início)</div>
+      <div class="kpi-value yellow">3,41%</div>
+      <div class="kpi-sub">12m: 3,61% a.a.</div>
+    </div>
+    <div class="kpi-card orange">
+      <div class="kpi-label">Sharpe Ratio</div>
+      <div class="kpi-value">2,05</div>
+      <div class="kpi-sub">Mais Retorno (desde início)</div>
+    </div>
+    <div class="kpi-card blue">
+      <div class="kpi-label">PL atual</div>
+      <div class="kpi-value" style="font-size: 22px;">R$ 32,8mi</div>
+      <div class="kpi-sub">Cotistas: 281 (jul/2026)</div>
+    </div>
+    <div class="kpi-card green">
+      <div class="kpi-label">Rentabilidade 12m</div>
+      <div class="kpi-value green">+22,3%</div>
+      <div class="kpi-sub">ANBIMA | 02/jul/2026</div>
+    </div>
+  </div>
+</section>
+
+<!-- RENTABILIDADE MENSAL -->
+<section>
+  <div class="section-title">Rentabilidade mensal completa</div>
+  <div class="analysis-card">
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Ano</th>
+            <th>Jan</th><th>Fev</th><th>Mar</th><th>Abr</th><th>Mai</th><th>Jun</th>
+            <th>Jul</th><th>Ago</th><th>Set</th><th>Out</th><th>Nov</th><th>Dez</th>
+            <th>Ano</th><th>CDI</th><th>% CDI</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="highlight">2024</td>
+            <td class="muted">—</td><td class="muted">—</td>
+            <td class="num green">0,48%</td><td class="num green">1,36%</td>
+            <td class="num green">1,30%</td><td class="num green">1,55%</td>
+            <td class="num green">1,25%</td><td class="num green" style="color:var(--green);font-weight:800;">2,60%</td>
+            <td class="num green">0,79%</td><td class="num green">1,50%</td>
+            <td class="num green">1,28%</td><td class="num green" style="color:var(--muted);">0,26%</td>
+            <td class="num highlight">13,06%</td><td class="num muted">8,57%</td><td class="num green">152,3%</td>
+          </tr>
+          <tr>
+            <td class="highlight">2025</td>
+            <td class="num green">1,64%</td><td class="num green">1,13%</td>
+            <td class="num green">1,47%</td><td class="num green">1,55%</td>
+            <td class="num green">1,66%</td><td class="num green">2,32%</td>
+            <td class="num green">2,33%</td><td class="num green">2,41%</td>
+            <td class="num green">1,97%</td><td class="num green">1,26%</td>
+            <td class="num green">1,47%</td><td class="num green">2,52%</td>
+            <td class="num highlight" style="color:var(--green);">24,01%</td><td class="num muted">14,32%</td><td class="num green">167,6%</td>
+          </tr>
+          <tr>
+            <td class="highlight">2026</td>
+            <td class="num green">1,10%</td><td class="num green">1,15%</td>
+            <td class="num green">1,02%</td><td class="num green">1,96%</td>
+            <td class="num green">1,75%</td>
+            <td class="num" style="color:var(--muted);">~1,7%*</td>
+            <td class="muted">—</td><td class="muted">—</td><td class="muted">—</td>
+            <td class="muted">—</td><td class="muted">—</td><td class="muted">—</td>
+            <td class="num green">7,17%†</td><td class="num muted">5,66%†</td><td class="num green">126,7%†</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div style="margin-top:12px; font-size: 11px; color: var(--muted);">
+      * Jun/2026 estimado com base no acumulado do site Rio Gestão (03/jul/2026).
+      † Acumulado Jan–Mai/2026 (material de divulgação mai/2026).
+      Rentabilidade bruta de impostos, líquida de taxas.
+    </div>
+  </div>
+</section>
+
+<!-- ESTRATÉGIA -->
+<section>
+  <div class="section-title">Estratégia — Multimercado Trading Sistemático</div>
+  <div class="strategy-card">
+    <p style="color: var(--muted); font-size: 14px; line-height: 1.7; max-width: 780px;">
+      O Barracuda FIM opera com <strong style="color:var(--text);">modelos quantitativos</strong> para capturar distorções e ineficiências de preço de curto prazo no mercado de ações e derivativos brasileiro. O núcleo da estratégia é o robô algorítmico proprietário denominado <strong style="color:var(--accent);">"Lagosta"</strong>.
+    </p>
+    <div class="strategy-pillars">
+      <div class="pillar">
+        <div class="pillar-num">1</div>
+        <h4>Trading Direcional</h4>
+        <p>Posicionamento de curto prazo em ações (PETR4, VALE3) e derivativos (Ibovespa Futuro, S&P Futuro) com base em modelos quantitativos de momentum e distorção de preços.</p>
+      </div>
+      <div class="pillar">
+        <div class="pillar-num">2</div>
+        <h4>Long × Short (Arbitragem)</h4>
+        <p>Pares de ativos correlacionados: ITUB4 × ITSA4, PETR3 × PETR4, AXIA7 × AXIA6. Captura a convergência de spread sem exposição direcional líquida.</p>
+      </div>
+      <div class="pillar">
+        <div class="pillar-num">3</div>
+        <h4>Stock Picking</h4>
+        <p>Portfólio comprado em mid/small caps brasileiras com grande desconto fundamentalista: INBR32, AALR3, STOC34. Este pilar gera exposição direcional ao mercado local.</p>
+      </div>
+    </div>
+    <div class="callout info" style="margin-top: 20px;">
+      <strong>Robô "Lagosta":</strong> O sistema de trading algorítmico é otimizado para capturar desequilíbrios gerados por fluxos não-ordenados — saídas de capital, rotações setoriais e distorções em preços de opções (vendedores de put ilhados em strikes deep ITM). Funciona melhor em ambientes de mercado volátil ou em rotação, não em mercados ordenados via ETFs e formadores de mercado.
+    </div>
+    <div class="callout warn" style="margin-top: 14px;">
+      <strong>Nota regulatória:</strong> O sufixo "Crédito Privado" no nome ANBIMA da classe <em>não</em> descreve a estratégia — é um artefato que amplia a flexibilidade regulatória do regulamento. A estratégia real é trading de ações e derivativos.
+    </div>
+  </div>
+</section>
+
+<!-- FORÇAS E FRAQUEZAS -->
+<section>
+  <div class="section-title">Forças</div>
+  <div class="analysis-card">
+    <ul class="item-list">
+      <li class="force">
+        <strong>0 meses negativos em 27 meses</strong>
+        Track record de consistência excepcional: o pior mês foi +0,26% (dez/2024). Em 27 meses, o fundo nunca registrou rentabilidade negativa — incluindo períodos adversos como o Ibovespa de jul/2025 (−4,2%), mai/2026 (−8,6%) e mar/2026 (−0,7%). Essa consistência sugere que a estratégia captura alfa de forma robusta, independentemente da direção do mercado.
+      </li>
+      <li class="force">
+        <strong>Retorno muito superior ao CDI com volatilidade controlada</strong>
+        161% do CDI acumulado e 167,6% em 2025 — em uma classe (multimercado) onde a média da indústria mal supera o CDI. Com volatilidade de apenas 3,41%, o Sharpe de 2,05 é expressivo para o histórico disponível. Os meses de maior retorno (ago/2024: +2,60%; ago/2025: +2,41%; jun-ago/2025: sequência de +2,32%/+2,33%/+2,41%) foram capturados em momentos de alta volatilidade de mercado — exatamente quando o Lagosta performa melhor.
+      </li>
+      <li class="force">
+        <strong>Estratégia com lógica econômica clara e verificável</strong>
+        O mecanismo de captura de ineficiências relativas (distorções entre ativos correlacionados, opções fora de preço, arbitragem de pares) é uma estratégia estabelecida e com fundamento econômico sólido. Não depende de previsões macroeconômicas ou de direção de mercado para funcionar.
+      </li>
+      <li class="force">
+        <strong>Baixa barreira de entrada e liquidez razoável</strong>
+        Mínimo de R$ 100 (acessível para qualquer perfil). Resgate em D+30 corridos + D+2 pagamento — prazo adequado para uma estratégia de curto prazo. Sem carência ou taxa de saída.
+      </li>
+      <li class="force">
+        <strong>Gestora com +20 anos de histórico e equipe estável</strong>
+        Rio Gestão fundada em 2006. Equipe principal com mais de 25 anos de atuação conjunta — não é uma startup de gestão. O Rio Ações FIA (início dez/2006) acumula resultado sólido: +39,29% em 2025 vs Ibov +33,95%. Transparência: cartas mensais detalhadas com atribuição de resultado por estratégia.
+      </li>
+      <li class="force">
+        <strong>Fee structure alinhada com o cotista</strong>
+        Taxa de performance semestral (fev/ago) com linha d'água — o gestor só ganha 20% quando supera o CDI e apenas sobre a valorização acima da cota base atualizada. Isso evita a cobrança de performance em recuperações de drawdowns anteriores.
+      </li>
+      <li class="force">
+        <strong>Administração e custódia BTG Pactual (institucional)</strong>
+        BTG é um dos maiores custodiantes e administradores do Brasil — nível de governança e segurança operacional institucional. Mesma estrutura usada por grandes fundos da Carteira Z (Guepardo, Absolute, etc.).
+      </li>
+    </ul>
+  </div>
+</section>
+
+<section>
+  <div class="section-title">Fraquezas</div>
+  <div class="analysis-card">
+    <ul class="item-list">
+      <li class="weakness">
+        <strong>Histórico muito curto — 27 meses</strong>
+        Um ciclo completo de mercado no Brasil costuma envolver pelo menos 5 a 7 anos de altas, baixas, crises e recuperações. O Barracuda nasceu em março de 2024 — período de expansão da bolsa brasileira (+33,95% em 2025). Não sabemos como o Lagosta se comporta em: recessão doméstica profunda, crise de crédito sistêmica, ou bear market prolongado de ações. O histórico de 2024 é parcial (10 meses), e 2026 ainda está em curso.
+      </li>
+      <li class="weakness">
+        <strong>PL muito pequeno (R$ 32 mi) — questões de viabilidade e escalabilidade</strong>
+        Com R$ 32 milhões sob gestão, o fundo enfrenta: (1) custo mínimo de R$ 2.500/mês em taxa de administração representa proporcionalmente um custo elevado sobre o PL pequeno; (2) qualquer resgate de porte (ex: um cotista com R$ 500k decide sair) pode impactar a liquidez das operações; (3) a escala limita o acesso a operações de maior tamanho em derivativos que requerem margem expressiva. Para comparação, os pares analisados no documento: Milênio BC II (R$ 1,24 bi) e Ace Capital (R$ 105 mi).
+      </li>
+      <li class="weakness">
+        <strong>Taxa total potencialmente cara</strong>
+        2,1% a.a. de taxa de administração + 20% sobre o que exceder CDI. Se o fundo entregar 160% do CDI com Selic a 14%, o custo efetivo ao investidor pode chegar a ~3,5–4% a.a. em taxas — peso relevante em qualquer cenário de CDI elevado. Em comparação, fundos de mesmo porte e estratégia mais matura costumam ter 1,5–2,0% de administração.
+      </li>
+      <li class="weakness">
+        <strong>Come-cotas semestral em maio e novembro</strong>
+        O fundo é tributado como longo prazo com come-cotas — a alíquota de 15% incide semestralmente sobre os rendimentos. Isso reduz o retorno líquido na comparação com fundos como Artesanal D+2 que operam estratégias similares com a mesma tributação. Não há vantagem tributária especial.
+      </li>
+      <li class="weakness">
+        <strong>Terceiro pilar (Stock Picking) introduz risco direcional não negligenciável</strong>
+        O portfólio de mid/small caps compradas (INBR32, AALR3, STOC34, entre outras) cria exposição direcional à bolsa brasileira. Em julho/2025, o Stock Picking contribuiu −4,31% nos multimercados equivalentes da Rio Gestão, compensado por outros pilares. Em cenários de queda coordenada e ilíquida, esse pilar pode gerar drawdowns que contrariam a percepção de fundo "não-direcional".
+      </li>
+    </ul>
+  </div>
+</section>
+
+<!-- PONTOS DE PREOCUPAÇÃO -->
+<section>
+  <div class="section-title">Pontos de Preocupação</div>
+  <div class="analysis-card">
+    <ul class="item-list">
+      <li class="warning">
+        <strong>Reorganização recente do grupo (abril/2026) — risco de transição</strong>
+        Em abril/2026, a gestora realizou uma reorganização interna significativa: os fundos de trading e renda variável (incluindo o Barracuda) foram concentrados na Rio Gestão, enquanto as estratégias de crédito foram separadas sob a Tagus. Esse tipo de reorganização societária sempre carrega riscos operacionais: mudança de controle, renegociação de acordos de serviço, possível rotatividade de equipe. O Barracuda só passou a ter seção própria nas cartas mensais a partir de abril/2026 — antes, era invisível nos relatórios da Rio Gestão. Não está claro qual era a estrutura de governança e reporte pré-reorganização.
+      </li>
+      <li class="warning">
+        <strong>O robô "Lagosta" é uma caixa-preta — sem transparência sobre o modelo</strong>
+        As cartas descrevem o que o Lagosta faz (captura distorções) mas não como. Não há disclosure de: metodologia quantitativa, frequência de rebalanceamento, parâmetros de risco do modelo, backtesting histórico, capacidade máxima estimada, ou processo de manutenção do modelo. Fundos sistemáticos têm risco de "overfitting" ao histórico recente — um modelo calibrado para o ambiente 2024–2025 pode performar mal em ambientes radicalmente distintos.
+      </li>
+      <li class="warning">
+        <strong>Melhor desempenho em agosto 2024 (+2,60%): correlação suspeita com o Ibov</strong>
+        Agosto/2024 foi o melhor mês do Barracuda (+2,60%). O Ibovespa também se recuperou fortemente naquele mês (+6,28%). Isso levanta a questão: parte do retorno de agosto/2024 foi gerada pelo pilar de Stock Picking (posição comprada em mid/small caps que se valorizou junto com o Ibov)? Se sim, o Barracuda pode ter mais correlação com o mercado de ações do que o framing de "trading sistemático" sugere.
+      </li>
+      <li class="warning">
+        <strong>Fundo nasceu em um ambiente ideal — bull market e alta volatilidade</strong>
+        Mar/2024 a mai/2026 foi um período excepcionalmente favorável para estratégias de trading em bolsa brasileira: Ibovespa +33,95% em 2025 (recordes históricos), fluxo externo maciço gerando rotação constante de ativos, Selic elevada aumentando os prêmios de derivativos. O Lagosta pode nunca ter sido testado em um mercado com baixa volatilidade, spread comprimido, ou tendência persistente de queda.
+      </li>
+      <li class="warning">
+        <strong>Concentração de cotistas não divulgada — risco de resgate concentrado</strong>
+        Com 281 cotistas e PL de R$ 32 mi, o tíquete médio é ~R$ 115 mil. Mas a distribuição pode ser muito concentrada: se os top-5 cotistas representam 60%+ do PL (cenário plausível em fundo pequeno), a saída de qualquer um deles force-sells em derivativos e gera impacto no NAV. Não há disclosure de concentração de cotistas nas fontes disponíveis.
+      </li>
+    </ul>
+  </div>
+</section>
+
+<!-- PONTOS DE ATENÇÃO -->
+<section>
+  <div class="section-title">Pontos de Atenção</div>
+  <div class="analysis-card">
+    <ul class="item-list">
+      <li class="attention">
+        <strong>Alavancagem permitida até 70% do PL — precisa de monitoramento ativo</strong>
+        O regulamento autoriza operações que gerem alavancagem, com risco de capital de até 70% do PL. Em condições normais, isso é gerido pelo Lagosta. Em momentos de stress severo (gap de mercado, circuit breaker, evento de liquidez), a alavancagem pode amplificar perdas além do esperado. Este risco está parcialmente precificado na volatilidade de 3,41%, mas não está testado em condições extremas.
+      </li>
+      <li class="attention">
+        <strong>A performance de 2025 pode ser partly luck — teste em 2026 é crucial</strong>
+        O retorno de 2025 (+24,01% = 167% CDI) é notável, mas coincide com um dos melhores anos da história recente da bolsa brasileira, com fluxo externo recorde (R$ 25,5bi) gerando distorções constantes. O primeiro semestre de 2026 já mostra moderação: +7,17% em Jan–Mai (126% CDI) — ainda bom, mas significativamente abaixo do ritmo de 2025. A continuação do monitoramento em 2026 é determinante para validar o modelo.
+      </li>
+      <li class="attention">
+        <strong>Liquidez D+30 pode ser insuficiente em momentos de stress</strong>
+        D+30 corridos é um prazo de resgate compatível com a estratégia de derivativos, mas pode ser um problema em situações onde o investidor precisa de liquidez rápida. Comparado ao Artesanal D+2 (dois dias úteis), o prazo é 15x maior. Para a Carteira Z, dependendo do papel que o fundo vai ocupar, esse prazo pode limitar a utilizabilidade como reserva de liquidez.
+      </li>
+      <li class="attention">
+        <strong>Distribuição limitada — plataformas disponíveis não identificadas</strong>
+        O fundo tem 4 distribuidores registrados na ANBIMA, mas os documentos não identificam explicitamente quais plataformas. A distribuição parece concentrada — provavelmente BTG e talvez Orama, dadas as conexões da gestora. Para um cotista que usa exclusivamente XP ou Nu, pode haver limitação de acesso.
+      </li>
+      <li class="attention">
+        <strong>Não há garantia do tratamento tributário de longo prazo</strong>
+        O regulamento explicita: "NÃO HÁ GARANTIA DE QUE ESTA CLASSE TERÁ O TRATAMENTO TRIBUTÁRIO PARA FUNDOS DE LONGO PRAZO quando a composição da carteira de títulos tenha prazo médio igual ou inferior a 365 dias." Se o Lagosta operar predominantemente com derivativos de prazo curto, a carteira pode ser reclassificada como de curto prazo (come-cotas 20%, alíquota adicional). Esse risco é estrutural da estratégia de trading.
+      </li>
+    </ul>
+  </div>
+</section>
+
+<!-- COMPARATIVO COM PARES -->
+<section>
+  <div class="section-title">Comparativo com pares de mercado (Multimercado Trading)</div>
+  <div class="analysis-card">
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Fundo</th>
+            <th>Início</th>
+            <th>PL</th>
+            <th>Rent. 2024</th>
+            <th>Rent. 2025</th>
+            <th>Volatilidade</th>
+            <th>Sharpe</th>
+            <th>Observação</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="highlight">Barracuda FIM</td>
+            <td>mar/2024</td>
+            <td>R$ 32 mi</td>
+            <td class="num green">13,06%</td>
+            <td class="num green" style="font-weight:800;">24,01%</td>
+            <td class="num yellow">3,41%</td>
+            <td class="num green">2,05</td>
+            <td>Líder em 2025; histórico curto</td>
+          </tr>
+          <tr>
+            <td>Milênio BC II FIF CI Mult</td>
+            <td>nov/2014</td>
+            <td>R$ 1,24 bi</td>
+            <td class="num">11,05%</td>
+            <td class="num">—</td>
+            <td class="num green">0,76%</td>
+            <td class="num">2,02</td>
+            <td>Mais conservador; escala muito maior</td>
+          </tr>
+          <tr>
+            <td>Ace Capital Dinâmico Master</td>
+            <td>out/2011</td>
+            <td>R$ 105 mi</td>
+            <td class="num">13,42%</td>
+            <td class="num">—</td>
+            <td class="num">> Milênio</td>
+            <td class="num green" style="font-weight:800;">3,18</td>
+            <td>Maior Sharpe; histórico 15 anos</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="callout info" style="margin-top: 16px;">
+      O Barracuda lidera em 2024 e (presumidamente) em 2025 entre os três, mas com volatilidade 4–5x maior que o Milênio. O Sharpe de 2,05 é expressivo para 27 meses de histórico, mas inferior ao Ace Capital (3,18) com 15 anos de track record. O fundo ainda precisa demonstrar consistência em múltiplos ciclos.
+    </div>
+  </div>
+</section>
+
+<!-- GESTORA -->
+<section>
+  <div class="section-title">Análise da Gestora — Rio Performance Gestão de Recursos</div>
+  <div class="gestora-grid">
+    <div class="info-block">
+      <div class="info-row"><span class="ir-label">CNPJ</span><span class="ir-val">07.807.954/0001-50</span></div>
+      <div class="info-row"><span class="ir-label">Fundação</span><span class="ir-val">2006 (20 anos)</span></div>
+      <div class="info-row"><span class="ir-label">Credenciamento CVM</span><span class="ir-val">AD 8.932 — 24/08/2006</span></div>
+      <div class="info-row"><span class="ir-label">Sede</span><span class="ir-val">Leblon, Rio de Janeiro</span></div>
+      <div class="info-row"><span class="ir-label">Time (anos juntos)</span><span class="ir-val">+25 anos</span></div>
+      <div class="info-row"><span class="ir-label">AUM total (jul/2026)</span><span class="ir-val">~R$ 81 mi (3 fundos)</span></div>
+      <div class="info-row"><span class="ir-label">Distribuição Barracuda</span><span class="ir-val">4 distribuidores (ANBIMA)</span></div>
+      <div class="info-row"><span class="ir-label">Transparência</span><span class="ir-val">Cartas mensais detalhadas</span></div>
+    </div>
+    <div class="analysis-card" style="margin-top:0;">
+      <h3 style="font-size:15px; font-weight:700; margin-bottom:16px;">Avaliação qualitativa</h3>
+      <ul class="item-list">
+        <li class="force">
+          <strong>Experiência e estabilidade da equipe</strong>
+          Equipe principal atuando há mais de 25 anos em conjunto. O Rio Ações FIA (dez/2006) é uma referência de track record de longo prazo da gestora: +39,29% em 2025 vs Ibov +33,95%. A gestora não é nova — tem quase 20 anos de operação regulada pela CVM.
+        </li>
+        <li class="attention">
+          <strong>AUM total muito pequeno para o tamanho da gestora</strong>
+          Somando todos os fundos, a Rio Gestão gere aproximadamente R$ 81 milhões em julho/2026. Para uma gestora com 20 anos de história e equipe de seniores experientes, esse AUM é notavelmente baixo. Pode indicar: dificuldade de distribuição, perfil de nicho, ou que parte relevante do AUM histórico esteve sob estrutura diferente (Tagus). A reorganização de abr/2026 precisa ser monitorada — o fato de os fundos principais aparecerem com PLs pequenos pode ser consequência da separação.
+        </li>
+        <li class="force">
+          <strong>Transparência e comunicação exemplares</strong>
+          As cartas mensais são extensas, analíticas e com nível de detalhe raro no mercado brasileiro: atribuição de resultado por estratégia, posicionamento nomeado por ativo, visão macro articulada. Isso permite ao investidor acompanhar ativamente a tomada de decisão do gestor.
+        </li>
+        <li class="warning">
+          <strong>Concentração de risco em poucos produtos</strong>
+          Três fundos ativos com PL total de ~R$ 81 mi. A sustentabilidade econômica da gestora (folha de pagamento, compliance, tecnologia do Lagosta, infraestrutura) depende inteiramente dessa receita. Uma crise de resgates ou underperformance prolongada pode comprometer a estrutura operacional. Gestoras com AUM inferior a R$ 200–300 mi frequentemente têm margem operacional pressionada.
+        </li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- COMPARAÇÃO COM ARTESANAL D+2 -->
+<section>
+  <div class="section-title">Barracuda FIM vs. Artesanal D+2 — Há similaridade?</div>
+  <div class="compare-box">
+    <h3>Análise Comparativa</h3>
+    <p class="intro">
+      O Artesanal D+2 é o principal fundo de "caixa com alfa" das Carteiras Z — estratégia de long & short não-direcional, arbitragem de opções e renda fixa curta, com liquidez em 2 dias úteis. A pergunta é relevante porque ambos buscam retorno acima do CDI com risco controlado e usam derivativos. A resposta, porém, é matizada.
+    </p>
+    <div class="compare-grid">
+      <div class="compare-side">
+        <div class="fund-name blue">Barracuda FIM</div>
+        <div class="compare-row"><span class="cr-label">Início</span><span class="cr-val">mar/2024 (2,4 anos)</span></div>
+        <div class="compare-row"><span class="cr-label">PL</span><span class="cr-val">R$ 32 mi</span></div>
+        <div class="compare-row"><span class="cr-label">Liquidez resgate</span><span class="cr-val">D+30 corridos + D+2</span></div>
+        <div class="compare-row"><span class="cr-label">Volatilidade (desde início)</span><span class="cr-val" style="color:var(--yellow)">3,41% a.a.</span></div>
+        <div class="compare-row"><span class="cr-label">Pior mês histórico</span><span class="cr-val" style="color:var(--green)">+0,26% (positivo)</span></div>
+        <div class="compare-row"><span class="cr-label">Drawdown máximo</span><span class="cr-val" style="color:var(--green)">~0% (nenhum negativo)</span></div>
+        <div class="compare-row"><span class="cr-label">% CDI acumulado</span><span class="cr-val" style="color:var(--green)">161,3%</span></div>
+        <div class="compare-row"><span class="cr-label">Estratégia primária</span><span class="cr-val">Trading sistemático + Stock Picking</span></div>
+        <div class="compare-row"><span class="cr-label">Direcional?</span><span class="cr-val" style="color:var(--yellow)">Sim (Stock Picking = comprado)</span></div>
+        <div class="compare-row"><span class="cr-label">Taxa adm.</span><span class="cr-val">2,10% a.a.</span></div>
+        <div class="compare-row"><span class="cr-label">Administrador</span><span class="cr-val">BTG Pactual</span></div>
+      </div>
+      <div class="compare-side">
+        <div class="fund-name purple">Artesanal D+2</div>
+        <div class="compare-row"><span class="cr-label">Início</span><span class="cr-val">dez/2008 (17,5 anos)</span></div>
+        <div class="compare-row"><span class="cr-label">PL</span><span class="cr-val">R$ 2.755 mi</span></div>
+        <div class="compare-row"><span class="cr-label">Liquidez resgate</span><span class="cr-val" style="color:var(--green)">D+2 úteis</span></div>
+        <div class="compare-row"><span class="cr-label">Volatilidade (recente)</span><span class="cr-val" style="color:var(--green)">1,54–2,61% a.a.</span></div>
+        <div class="compare-row"><span class="cr-label">Pior mês histórico</span><span class="cr-val" style="color:var(--red)">−8,31% (2011)</span></div>
+        <div class="compare-row"><span class="cr-label">Drawdown máximo</span><span class="cr-val" style="color:var(--red)">−8,31% (recuperado em 5d)</span></div>
+        <div class="compare-row"><span class="cr-label">% CDI (histórico)</span><span class="cr-val">130,3% (desde 2008)</span></div>
+        <div class="compare-row"><span class="cr-label">Estratégia primária</span><span class="cr-val">L×S pares + arbitragem derivativos + RF curta</span></div>
+        <div class="compare-row"><span class="cr-label">Direcional?</span><span class="cr-val" style="color:var(--green)">Não (beta Ibov = 0,005)</span></div>
+        <div class="compare-row"><span class="cr-label">Taxa adm.</span><span class="cr-val">2,0% a.a.</span></div>
+        <div class="compare-row"><span class="cr-label">Administrador</span><span class="cr-val">BTG Pactual</span></div>
+      </div>
+    </div>
+
+    <div style="margin-bottom: 20px;">
+      <div style="font-size:12px; font-weight:700; letter-spacing:1px; text-transform:uppercase; color:var(--muted); margin-bottom:12px;">Performance acumulada por janela (%CDI)</div>
+      <div class="perf-bar-wrap">
+        <div class="perf-bar-item">
+          <div class="perf-bar-label"><span>Barracuda — desde início (27m)</span><span>161,3% CDI</span></div>
+          <div class="perf-bar-track"><div class="perf-bar-fill green" style="width:80%"></div></div>
+        </div>
+        <div class="perf-bar-item">
+          <div class="perf-bar-label"><span>Artesanal — 15 anos</span><span>128,3% CDI</span></div>
+          <div class="perf-bar-track"><div class="perf-bar-fill" style="width:60%"></div></div>
+        </div>
+        <div class="perf-bar-item">
+          <div class="perf-bar-label"><span>Artesanal — 12 meses (mai/2026)</span><span>112,0% CDI</span></div>
+          <div class="perf-bar-track"><div class="perf-bar-fill" style="width:50%"></div></div>
+        </div>
+        <div class="perf-bar-item">
+          <div class="perf-bar-label"><span>Barracuda — 12 meses (mai/2026)</span><span>158,0% CDI</span></div>
+          <div class="perf-bar-track"><div class="perf-bar-fill green" style="width:76%"></div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="verdict-box">
+      <h4>Veredicto — Há similaridade superficial, mas são produtos diferentes</h4>
+      <p>
+        <strong>O que é similar:</strong> Ambos são multimercados que buscam CDI+ usando long × short e arbitragem de derivativos. Ambos são administrados pelo BTG. Ambos têm 20% de performance fee sobre CDI e buscam retornos não correlacionados com o mercado.
+      </p>
+      <p style="margin-top:10px;">
+        <strong>O que é fundamentalmente diferente:</strong> O Artesanal é um fundo de <em>caixa</em> — função de preservação de capital com liquidez de 2 dias, beta de 0,005, volatilidade de 1,5–2,6% e nunca perdedor em janelas de 5 anos. O Barracuda tem exposição direcional real (pilar de Stock Picking), volatilidade 2x maior (3,41%), liquidez muito menor (D+32) e retornos proporcionalmente mais elevados. Na prática, o Barracuda ocupa uma faixa de risco-retorno entre o Artesanal (caixa) e um multimercado macro tradicional — é mais agressivo do que parece pelo framing "trading sistemático".
+      </p>
+      <p style="margin-top:10px;">
+        A comparação mais honesta: o Barracuda em 2025 entregou o que o Artesanal em seus melhores anos entrega — mas com volatilidade maior, histórico menor e em um ambiente excepcionalmente favorável. Para substituir o Ouro Preto Real, o Barracuda deve ser avaliado por suas características próprias, não como um "Artesanal melhorado".
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- VEREDICTO FINAL -->
+<section>
+  <div class="section-title">Síntese Analítica</div>
+  <div class="verdict-row">
+    <div class="verdict-item positive">
+      <div class="vi-label">Para considerar</div>
+      <div class="vi-text">
+        Track record de 27 meses impecável (0 meses negativos, 161% CDI acumulado). Estratégia com lógica econômica verificável. Gestora experiente e transparente. Robô "Lagosta" com capacidade demonstrada de capturar distorções em ambientes voláteis. Estrutura de taxa alinhada com o cotista.
+      </div>
+    </div>
+    <div class="verdict-item caution">
+      <div class="vi-label">Atenção crítica</div>
+      <div class="vi-text">
+        Histórico curto em ambiente excepcionalmente favorável. PL pequeno (R$ 32 mi) gera riscos de concentração e sustentabilidade operacional. Reorganização societária recente (abr/2026) traz incerteza de curto prazo. Caixa-preta do Lagosta requer due diligence adicional sobre a metodologia.
+      </div>
+    </div>
+    <div class="verdict-item negative">
+      <div class="vi-label">Risco principal</div>
+      <div class="vi-text">
+        O fundo nunca foi testado em um mercado de ações em queda coordenada e prolongada com o pilar de Stock Picking. A alavancagem permitida (até 70% risco de capital) e a liquidez D+30 reduzida criam assimetrias em momentos de stress que o histórico curto não capturou.
+      </div>
+    </div>
+  </div>
+
+  <div class="callout warn" style="margin-top: 24px;">
+    <strong>Recomendação para o processo de substituição do Ouro Preto Real:</strong><br>
+    O Barracuda FIM é um candidato legítimo e promissor, mas com due diligence incompleta pelo histórico curto. Antes de formalizar a entrada nas carteiras, recomenda-se: (1) obter informações sobre a metodologia do Lagosta e o processo de gerenciamento de risco; (2) verificar a concentração de cotistas e a estrutura acionária da gestora pós-reorganização; (3) definir qual papel o fundo ocupa nas carteiras — se for "caixa com alfa", a liquidez D+30 é um problema; se for um slot de multimercado puro, a enquadramento é mais adequado. O tamanho inicial de alocação deve ser conservador (fatia menor do que a do Ouro Preto Real) até consolidar mais histórico em 2026.
+  </div>
+</section>
+
+</div><!-- /container -->
+
+<div class="footer">
+  Carteira Z — Relatório de Análise | Barracuda FIM (CNPJ 54.030.009/0001-74) | Elaborado em 07/jul/2026<br>
+  Fontes: Regulamento Barracuda FIM; Material de Divulgação mai/2026; ANBIMA; Cartas Mensais Rio Gestão jun/2025–mai/2026; Relatório de análise de performance comparativa.<br>
+  Rentabilidade passada não é garantia de rentabilidade futura. Este documento é de uso interno da Carteira Z.
+</div>
+
+</body>
+</html>
