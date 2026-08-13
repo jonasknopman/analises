@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reunião com o Gestor da Artesanal — Impacto nos Fundos Recomendados | Carteira Z</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      font-size: 14px;
+      line-height: 1.6;
+      color: #1a1a2e;
+      background: #f5f7fa;
+    }
+
+    /* ── HEADER ── */
+    .page-header {
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+      color: white;
+      padding: 2rem 2.5rem;
+    }
+    .page-header .eyebrow {
+      font-size: 0.72rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: #64748b;
+      margin-bottom: 0.4rem;
+    }
+    .page-header h1 { font-size: 1.6rem; font-weight: 700; margin-bottom: 0.25rem; }
+    .page-header .sub { font-size: 0.9rem; color: #cbd5e1; margin-top: 0.35rem; }
+    .page-header .meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 2rem;
+      margin-top: 1rem;
+      font-size: 0.82rem;
+      color: #cbd5e1;
+    }
+    .page-header .meta span strong { color: white; }
+
+    /* ── LAYOUT ── */
+    .container { max-width: 1100px; margin: 0 auto; padding: 1.5rem 1.5rem 3rem; }
+
+    /* ── CARDS SUMMARY ── */
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1rem;
+      margin-bottom: 1.8rem;
+    }
+    .card {
+      background: white;
+      border-radius: 10px;
+      padding: 1.1rem 1.3rem;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+      border-top: 3px solid #e2e8f0;
+    }
+    .card.blue  { border-top-color: #2563eb; }
+    .card.red   { border-top-color: #dc2626; }
+    .card.green { border-top-color: #16a34a; }
+    .card.amber { border-top-color: #d97706; }
+    .card.purple{ border-top-color: #7c3aed; }
+    .card .label { font-size: 0.72rem; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600; }
+    .card .value { font-size: 1.4rem; font-weight: 700; color: #1a1a2e; margin-top: 0.25rem; }
+    .card.red    .value { color: #dc2626; }
+    .card.green  .value { color: #16a34a; }
+    .card.blue   .value { color: #1d4ed8; }
+    .card.amber  .value { color: #d97706; }
+    .card.purple .value { color: #7c3aed; }
+    .card .sub { font-size: 0.77rem; color: #64748b; margin-top: 0.15rem; }
+
+    /* ── SECTION ── */
+    section { margin-bottom: 2rem; }
+    section h2 {
+      font-size: 1rem;
+      font-weight: 700;
+      color: #1e3a5f;
+      padding-bottom: 0.5rem;
+      border-bottom: 2px solid #e2e8f0;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .section-card {
+      background: white;
+      border-radius: 10px;
+      padding: 1.3rem;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+    }
+
+    /* ── TABLE ── */
+    table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+    thead th {
+      background: #f1f5f9;
+      color: #475569;
+      font-size: 0.72rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      padding: 0.6rem 0.9rem;
+      text-align: left;
+      border-bottom: 2px solid #e2e8f0;
+    }
+    tbody td {
+      padding: 0.65rem 0.9rem;
+      border-bottom: 1px solid #f1f5f9;
+      vertical-align: middle;
+    }
+    tbody tr:hover { background: #f8fafc; }
+    tbody tr:last-child td { border-bottom: none; }
+    .num   { text-align: right; font-variant-numeric: tabular-nums; }
+    .center { text-align: center; }
+    .row-warn { background: #fffbeb !important; }
+    .row-head {
+      background: #f8fafc !important;
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: #475569;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    td strong { font-weight: 700; }
+
+    /* ── CHIPS / BADGES ── */
+    .chip {
+      display: inline-block;
+      font-size: 0.7rem;
+      padding: 0.15rem 0.55rem;
+      border-radius: 20px;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+    .chip-blue   { background: #dbeafe; color: #1d4ed8; }
+    .chip-green  { background: #dcfce7; color: #15803d; }
+    .chip-red    { background: #fee2e2; color: #b91c1c; }
+    .chip-orange { background: #fef3c7; color: #92400e; }
+    .chip-purple { background: #ede9fe; color: #5b21b6; }
+    .chip-gray   { background: #f1f5f9; color: #475569; }
+
+    .badge {
+      display: inline-block;
+      padding: 0.2rem 0.6rem;
+      border-radius: 20px;
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      white-space: nowrap;
+    }
+    .badge-out   { background: #fee2e2; color: #b91c1c; }
+    .badge-in    { background: #dcfce7; color: #15803d; }
+    .badge-stay  { background: #dbeafe; color: #1d4ed8; }
+    .badge-warn  { background: #fef3c7; color: #92400e; }
+
+    /* ── DIAG BOXES ── */
+    .diag-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    .diag-item {
+      border-radius: 8px;
+      padding: 1rem 1.1rem;
+      display: flex;
+      gap: 0.8rem;
+      align-items: flex-start;
+    }
+    .diag-item.bad  { background: #fef2f2; border-left: 4px solid #dc2626; }
+    .diag-item.warn { background: #fffbeb; border-left: 4px solid #f59e0b; }
+    .diag-item.ok   { background: #f0fdf4; border-left: 4px solid #16a34a; }
+    .diag-item.info { background: #eff6ff; border-left: 4px solid #2563eb; }
+    .diag-icon { font-size: 1.4rem; flex-shrink: 0; }
+    .diag-item h4 { font-size: 0.83rem; font-weight: 700; color: #1a1a2e; margin-bottom: 0.3rem; }
+    .diag-item p  { font-size: 0.79rem; color: #475569; line-height: 1.55; }
+
+    /* ── CALLOUT ── */
+    .callout {
+      border-radius: 8px;
+      padding: 1rem 1.2rem;
+      font-size: 0.83rem;
+      line-height: 1.6;
+    }
+    .callout.blue   { background: #eff6ff; border-left: 4px solid #2563eb; color: #1e3a5f; }
+    .callout.red    { background: #fef2f2; border-left: 4px solid #dc2626; color: #7f1d1d; }
+    .callout.green  { background: #f0fdf4; border-left: 4px solid #16a34a; color: #14532d; }
+    .callout.amber  { background: #fffbeb; border-left: 4px solid #f59e0b; color: #78350f; }
+    .callout.purple { background: #f5f3ff; border-left: 4px solid #7c3aed; color: #4c1d95; }
+    .callout strong { font-weight: 700; }
+
+    /* ── FUND CARD ROW (identidade) ── */
+    .fund-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      padding: 0.9rem 1.1rem;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      margin-bottom: 0.7rem;
+    }
+    .fund-row:last-child { margin-bottom: 0; }
+    .fund-row .fr-name { font-weight: 700; font-size: 0.86rem; color: #1a1a2e; }
+    .fund-row .fr-sub { font-size: 0.76rem; color: #64748b; margin-top: 0.1rem; }
+    .fund-row .fr-status { flex-shrink: 0; }
+
+    /* ── TIMELINE ── */
+    .tl { border-left: 2px solid #e2e8f0; margin-left: 0.6rem; padding-left: 1.2rem; }
+    .tl-item { position: relative; padding-bottom: 1rem; }
+    .tl-item:last-child { padding-bottom: 0; }
+    .tl-item::before {
+      content: '';
+      position: absolute; left: -1.51rem; top: 0.3rem;
+      width: 10px; height: 10px; border-radius: 50%;
+      background: #2563eb; border: 2px solid white; box-shadow: 0 0 0 2px #2563eb;
+    }
+    .tl-item .tl-date { font-size: 0.72rem; font-weight: 700; color: #2563eb; text-transform: uppercase; letter-spacing: 0.04em; }
+    .tl-item p { font-size: 0.82rem; color: #475569; margin-top: 0.15rem; }
+
+    /* ── FOOTER ── */
+    footer {
+      background: white;
+      border-top: 1px solid #e2e8f0;
+      padding: 1.2rem 2.5rem;
+      font-size: 0.73rem;
+      color: #94a3b8;
+    }
+    footer strong { color: #64748b; }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 768px) {
+      .summary-grid { grid-template-columns: 1fr 1fr; }
+      .diag-grid { grid-template-columns: 1fr; }
+      .fund-row { flex-direction: column; align-items: flex-start; }
+    }
+    @media print {
+      body { background: white; }
+      .section-card { box-shadow: none; border: 1px solid #e2e8f0; }
+      .page-header { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════════ HEADER -->
+<div class="page-header">
+  <div class="eyebrow">Carteira Z — Relatório de Impacto</div>
+  <h1>Reunião com o Gestor da Artesanal — Impacto nos Fundos Recomendados</h1>
+  <div class="sub">Como as informações trazidas pela Artesanal Investimentos afetam, direta ou indiretamente, os fundos hoje ou anteriormente recomendados pela Carteira Z.</div>
+  <div class="meta">
+    <span>Fonte: <strong>Reunião com o gestor da Artesanal</strong></span>
+    <span>Ingestão: <strong>13/08/2026</strong></span>
+    <span>Fundos analisados: <strong>6</strong></span>
+    <span>Mudança de portfólio: <strong>Nenhuma nesta rodada</strong></span>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- ═══════════════════════════════════════ SUMÁRIO -->
+  <div class="summary-grid">
+    <div class="card blue">
+      <div class="label">Fundos com impacto mapeado</div>
+      <div class="value">6</div>
+      <div class="sub">D+2, Artesanal 90, PREV, Everest 90, KP CP FIDC, MAG Cash 10</div>
+    </div>
+    <div class="card amber">
+      <div class="label">Possível reabertura — Artesanal D+2</div>
+      <div class="value">~R$300 mi</div>
+      <div class="sub">Janela ainda em 2026 · sem confirmação</div>
+    </div>
+    <div class="card red">
+      <div class="label">Possível reabertura — "Artesanal 90"</div>
+      <div class="value">~R$500 mi</div>
+      <div class="sub">Set–out/2026 · a mais relevante das duas</div>
+    </div>
+    <div class="card purple">
+      <div class="label">Achado principal</div>
+      <div class="value">Identificação</div>
+      <div class="sub">"Artesanal 90 (D90)" = fundo já documentado como Artesanal CP FIC FIM</div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════ RESUMO EXECUTIVO -->
+  <section>
+    <h2>📌 Resumo Executivo</h2>
+    <div class="section-card">
+      <p style="font-size:0.85rem; color:#475569; line-height:1.7; margin-bottom:1rem;">
+        A Artesanal Investimentos é gestora de <strong>três fundos que já passaram (ou passam) pelas
+        Carteiras Z</strong>: o D+2 (caixa com alfa), o CP FIC FIM — referido na reunião como
+        "Artesanal 90 (D90)" — (crédito privado, hoje fora da carteira) e o PREV FIM RL (previdência).
+        A reunião de 13/08/2026 traz três tipos de informação relevantes.
+      </p>
+      <div class="diag-grid">
+        <div class="diag-item info">
+          <div class="diag-icon">🏛️</div>
+          <div>
+            <h4>1. Governança</h4>
+            <p>Chegada de Aroldo Medeiros (ex-CEO BB Asset) — positiva, mas sem efeito prático imediato
+            em nenhum dos três fundos. Papel institucional, mesma equipe de gestão.</p>
+          </div>
+        </div>
+        <div class="diag-item warn">
+          <div class="diag-icon">🚪</div>
+          <div>
+            <h4>2. Duas possíveis reaberturas</h4>
+            <p>D+2 e "Artesanal 90" — ambas <strong>não confirmadas</strong>, mas relevantes porque
+            afetam diretamente fundos que hoje ocupam o lugar desses dois na Carteira Z.</p>
+          </div>
+        </div>
+        <div class="diag-item ok">
+          <div class="diag-icon">🔄</div>
+          <div>
+            <h4>3. Dados atualizados</h4>
+            <p>Carrego, PDD e composição do Artesanal 90 — refresca uma página da wiki que estava
+            parada em jan/2025.</p>
+          </div>
+        </div>
+      </div>
+      <div class="callout purple" style="margin-top:1rem;">
+        <strong>Nenhum dos três pontos, isoladamente, justifica mudança de recomendação hoje.</strong>
+        Mas o item 2 merece monitoramento ativo — se qualquer uma das janelas se confirmar, há uma
+        decisão real a ser tomada sobre onde direcionar novos aportes.
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════ IDENTIFICAÇÃO -->
+  <section>
+    <h2>🔎 O Achado Principal: Identificação do "Artesanal 90 (D90)"</h2>
+    <div class="section-card">
+      <p style="font-size:0.85rem; color:#475569; line-height:1.7; margin-bottom:1rem;">
+        A reunião nunca cita CNPJ. A identificação abaixo é uma <strong>inferência analítica por
+        correspondência de estrutura de carteira</strong>, cruzando três fontes já na wiki da Carteira Z.
+      </p>
+      <table>
+        <thead>
+          <tr><th>Fonte</th><th>Nome usado</th><th>Nº cotas</th><th>Nº FIDCs</th><th>Subordinação Sr./Mez.</th><th>Liquidez</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Relatório 31/01/2025</td><td>"Artesanal CP FIC FIM"</td><td colspan="2" class="center">—</td><td>—</td><td>—</td></tr>
+          <tr><td>Carta do gestor mai/2026</td><td>"Artesanal CP FIDC RL"</td><td class="num">54</td><td class="num">30</td><td class="num">53% / 20%</td><td>D+91</td></tr>
+          <tr class="row-warn"><td>Reunião 13/08/2026</td><td><strong>"Artesanal 90 (D90)"</strong></td><td class="num">~54</td><td class="num">~28</td><td class="num">~52% / ~21%</td><td>"90" no nome</td></tr>
+        </tbody>
+      </table>
+      <div class="callout blue" style="margin-top:1rem;">
+        <strong>Confiança alta:</strong> número de cotas idêntico (54) e subordinação a menos de 1 p.p.
+        de diferença. É o mesmo fundo nas três fontes — hoje sem recomendação ativa na Carteira Z
+        (substituído por Everest 90 e KP CP FIDC em jan/2025), mas com sinalização de possível retorno
+        ao mercado entre set–out/2026.
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════ TABELA DE IMPACTO -->
+  <section>
+    <h2>⚖️ Impacto por Fundo</h2>
+    <div class="section-card">
+      <table>
+        <thead>
+          <tr><th>Fundo</th><th>Status na Carteira Z</th><th>Impacto da reunião</th><th>Ação</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Artesanal D+2</strong></td>
+            <td><span class="badge badge-out">Fechado</span> desde dez/2025<br><span style="font-size:0.74rem;color:#64748b;">substituto: MAG CASH 10</span></td>
+            <td>Possível reabertura ainda em 2026 (~R$300mi sobre ~R$939mi via BTG)</td>
+            <td><span class="chip chip-gray">Watch</span></td>
+          </tr>
+          <tr class="row-warn">
+            <td><strong>Artesanal CP FIC FIM<br>("Artesanal 90")</strong></td>
+            <td><span class="badge badge-out">Fora da carteira</span> desde jan/2025<br><span style="font-size:0.74rem;color:#64748b;">substitutos: Everest 90 + KP CP FIDC</span></td>
+            <td><strong>Achado mais relevante.</strong> Possível reabertura set–out/2026 (~R$500mi) — maior e mais próxima das duas janelas</td>
+            <td><span class="chip chip-orange">Watch prioritário</span></td>
+          </tr>
+          <tr>
+            <td><strong>Artesanal PREV FIM RL</strong></td>
+            <td><span class="badge badge-stay">Aberto</span> · Z Prev Light</td>
+            <td>Nenhum — reunião confirma explicitamente que segue aberto</td>
+            <td><span class="chip chip-green">Sem ação</span></td>
+          </tr>
+          <tr>
+            <td><strong>Everest 90 FIC FIDC</strong></td>
+            <td><span class="badge badge-in">Ativo</span> em 8 carteiras (Z Plus, Z Medium, Z1–Z6 IQ)</td>
+            <td>Indireto — é o principal substituto histórico do fundo que pode reabrir</td>
+            <td><span class="chip chip-gray">Watch</span></td>
+          </tr>
+          <tr>
+            <td><strong>KP CP FIDC RL</strong></td>
+            <td><span class="badge badge-out">Fechado</span> desde 25/07/2026<br><span style="font-size:0.74rem;color:#64748b;">substituído pelo Everest 90</span></td>
+            <td>Indireto — nasceu como alternativa ao Artesanal CP FIC FIM em jan/2025; hoje ele mesmo está fechado</td>
+            <td><span class="chip chip-gray">Watch</span></td>
+          </tr>
+          <tr>
+            <td><strong>MAG CASH 10</strong></td>
+            <td><span class="badge badge-in">Ativo</span> · substituto do D+2</td>
+            <td>Indireto — reabertura do D+2 não implica reverter a recomendação (podem coexistir)</td>
+            <td><span class="chip chip-green">Sem ação</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════ POR QUE O ARTESANAL 90 É MAIS RELEVANTE -->
+  <section>
+    <h2>🧩 Por que o Caso do "Artesanal 90" é Mais Complexo que o do D+2</h2>
+    <div class="section-card">
+      <p style="font-size:0.85rem; color:#475569; line-height:1.7; margin-bottom:1rem;">
+        Desde que o Artesanal 90 fechou (jan/2025), <strong>os próprios substitutos já mudaram de
+        configuração entre si</strong> — uma eventual reabertura não seria uma simples "volta ao fundo
+        antigo".
+      </p>
+      <div class="tl">
+        <div class="tl-item">
+          <div class="tl-date">31/01/2025</div>
+          <p>Artesanal CP FIC FIM fecha para captação. Everest HY recomendado como <strong>principal
+          substituto</strong>; KP CP FIC FIM como <strong>alternativa conservadora</strong>.</p>
+        </div>
+        <div class="tl-item">
+          <div class="tl-date">Jan–Mai/2026</div>
+          <p>Everest fecha (jan) e reabre (mai/2026), voltando à seleção "O que Comprar".</p>
+        </div>
+        <div class="tl-item">
+          <div class="tl-date">25/07/2026</div>
+          <p>KP CP FIDC — a "alternativa conservadora" original — <strong>fecha para novas aplicações</strong>.</p>
+        </div>
+        <div class="tl-item">
+          <div class="tl-date">07/08/2026</div>
+          <p>Everest 90 <strong>absorve o espaço do KP</strong> em 8 carteiras (Z Plus, Z Medium, Z1–Z6
+          IQ). Caixinha vira "KP/Everest/MORE" fundida onde já coexistiam.</p>
+        </div>
+        <div class="tl-item">
+          <div class="tl-date">13/08/2026</div>
+          <p>Gestor sinaliza possível reabertura do Artesanal 90 entre <strong>set–out/2026</strong>
+          — num momento em que nenhum dos dois substitutos de jan/2025 está mais na configuração
+          original.</p>
+        </div>
+      </div>
+      <div class="callout amber" style="margin-top:1rem;">
+        <strong>Leitura da Carteira Z:</strong> se o Artesanal 90 reabrir, a decisão não é "voltar ou
+        não voltar" — é decidir se ele reentra como quarto componente da caixinha
+        "KP/Everest/MORE" já fundida, substitui parcialmente o Everest, ou fica de fora por enquanto.
+        Recomendo tratar como <strong>watch item de prioridade alta</strong> para set–out/2026, não
+        como ação imediata.
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════ DADOS ATUALIZADOS ARTESANAL 90 -->
+  <section>
+    <h2>📊 Dados Atualizados — Artesanal 90 (Carteira e Crédito)</h2>
+    <div class="section-card">
+      <div class="diag-grid">
+        <div class="diag-item info">
+          <div class="diag-icon">💰</div>
+          <div>
+            <h4>Carrego subiu para CDI+2,8%</h4>
+            <p>Cerca de 17% a.a. na taxa de juros atual — carrego mais alto do que o observado na
+            análise original de jan/2025.</p>
+          </div>
+        </div>
+        <div class="diag-item warn">
+          <div class="diag-icon">📈</div>
+          <div>
+            <h4>PDD subiu: 5,9% → 6,8%</h4>
+            <p>De jan/2025 até hoje. Segundo a gestora, reflete atraso de recebimentos (fomento
+            mercantil e pessoa física), não deterioração estrutural da carteira.</p>
+          </div>
+        </div>
+        <div class="diag-item ok">
+          <div class="diag-icon">🛡️</div>
+          <div>
+            <h4>Colchão de 37% de subordinação</h4>
+            <p>Suportaria PDD ~500% maior antes de atingir a camada mezanino — folga considerável
+            segundo a própria gestora.</p>
+          </div>
+        </div>
+        <div class="diag-item info">
+          <div class="diag-icon">🎯</div>
+          <div>
+            <h4>Originação mais seletiva</h4>
+            <p>Cheques menores, mais garantias, foco em indústria e varejo. Nova linha: tese de
+            consórcios (antecipação de reembolso de cotas canceladas), em expansão há ~1 ano.</p>
+          </div>
+        </div>
+      </div>
+      <div class="callout blue" style="margin-top:1rem;">
+        <strong>Para quando a comparação for feita a valer:</strong> a PDD de 6,8% do Artesanal 90
+        deve ser cotejada com a inadimplência do Everest (~0,50% média) e a PDD do KP CP (3,26% em
+        jun/2026) — não é sinal de alerta isolado, mas é o dado que vai pesar na decisão se a
+        reabertura se confirmar.
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════ FORA DO ESCOPO -->
+  <section>
+    <h2>🏖️ Fora do Escopo da Carteira Z</h2>
+    <div class="section-card">
+      <div class="fund-row">
+        <div>
+          <div class="fr-name">Arpoador FIDC</div>
+          <div class="fr-sub">Cotas subordinadas, mesma gestora (Artesanal). Mencionado na reunião: dor pontual em
+          operação imobiliária (em reestruturação) e fomento mercantil; visão da gestora é de que se
+          beneficiaria fortemente de uma Selic entre 8%–10% a.a.</div>
+        </div>
+        <div class="fr-status"><span class="badge badge-warn">Não monitorado pela Carteira Z</span></div>
+      </div>
+      <p style="font-size:0.78rem; color:#64748b; margin-top:0.8rem;">
+        Não consta no universo de fundos monitorados definido no CLAUDE.md. Tratado apenas como
+        contexto do mesmo complexo Artesanal — sem página própria criada, sem ação requerida.
+      </p>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════ AÇÕES RECOMENDADAS -->
+  <section>
+    <h2>✅ Ações Recomendadas</h2>
+    <div class="section-card">
+      <table>
+        <thead><tr><th>#</th><th>Ação</th></tr></thead>
+        <tbody>
+          <tr>
+            <td class="center"><strong>1</strong></td>
+            <td><strong>Nenhuma mudança de portfólio agora</strong> — ambas as reaberturas são hipóteses
+            da própria gestora, explicitamente não confirmadas ("não é uma confirmação nem uma
+            promessa").</td>
+          </tr>
+          <tr class="row-warn">
+            <td class="center"><strong>2</strong></td>
+            <td><strong>Monitorar ativamente set–out/2026</strong> para a janela do Artesanal 90 — é a
+            mais provável e a de maior impacto potencial (R$500mi, e um cenário de substituição já
+            mais complexo que o do D+2).</td>
+          </tr>
+          <tr>
+            <td class="center"><strong>3</strong></td>
+            <td>Quando/se qualquer uma das reaberturas for confirmada, produzir <strong>relatório de
+            decisão específico</strong> — comparando quantitativamente o fundo reaberto com o
+            substituto atual, no mesmo padrão usado na substituição KP → Everest 90 de 07/08/2026.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+</div>
+
+<footer>
+  <strong>Carteira Z</strong> — Relatório de Impacto — Reunião com o Gestor da Artesanal — 13/08/2026<br>
+  Fonte: raw/diversos/Reuniao com o gestor da Artesanal.md · Wiki Carteira Z (fundos/artesanal-d2,
+  fundos/artesanal-cp-fic-fim, fundos/artesanal-prev-fim, fundos/everest-90, fundos/kp-fic-fidc,
+  fundos/mag-cash-10, sinteses/impacto-reuniao-artesanal-ago-2026)
+</footer>
+
+</body>
+</html>
