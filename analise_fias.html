@@ -1,0 +1,1444 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>Fundos de Ações vs Ibovespa</title>
+<style>
+  :root {
+    color-scheme: light;
+    --surface-1:      #fcfcfb;
+    --page-plane:     #f9f9f7;
+    --text-primary:   #0b0b0b;
+    --text-secondary: #52514e;
+    --text-muted:     #898781;
+    --gridline:       #e1e0d9;
+    --baseline:       #c3c2b7;
+    --border:         rgba(11,11,11,0.10);
+    --good-text:      #006300;
+    --bad-text:       #b3261e;
+    --seq-100: #cde2fb; --seq-250: #86b6ef; --seq-400: #3987e5;
+    --seq-450: #2a78d6; --seq-500: #256abf; --seq-600: #184f95;
+    --chip-bg: #eef2f8;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:where(:not([data-theme="light"])) {
+      color-scheme: dark;
+      --surface-1:      #1a1a19;
+      --page-plane:     #0d0d0d;
+      --text-primary:   #ffffff;
+      --text-secondary: #c3c2b7;
+      --text-muted:     #898781;
+      --gridline:       #2c2c2a;
+      --baseline:       #383835;
+      --border:         rgba(255,255,255,0.10);
+      --good-text:      #0ca30c;
+      --bad-text:       #e66767;
+      --seq-100: #184f95; --seq-250: #1c5cab; --seq-400: #3987e5;
+      --seq-450: #3987e5; --seq-500: #5598e7; --seq-600: #86b6ef;
+      --chip-bg: #22262d;
+    }
+  }
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    --surface-1:      #1a1a19;
+    --page-plane:     #0d0d0d;
+    --text-primary:   #ffffff;
+    --text-secondary: #c3c2b7;
+    --text-muted:     #898781;
+    --gridline:       #2c2c2a;
+    --baseline:       #383835;
+    --border:         rgba(255,255,255,0.10);
+    --good-text:      #0ca30c;
+    --bad-text:       #e66767;
+    --seq-100: #184f95; --seq-250: #1c5cab; --seq-400: #3987e5;
+    --seq-450: #3987e5; --seq-500: #5598e7; --seq-600: #86b6ef;
+    --chip-bg: #22262d;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--page-plane);
+    color: var(--text-primary);
+    font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+    padding: 32px 20px 64px;
+  }
+  .wrap { max-width: 980px; margin: 0 auto; }
+
+  h1 { font-size: 1.5rem; margin: 0 0 4px; letter-spacing: -0.01em; }
+  .subtitle { color: var(--text-secondary); font-size: 0.92rem; margin: 0 0 24px; line-height: 1.5; }
+
+  .segmented {
+    display: inline-flex;
+    background: var(--surface-1);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 3px;
+    gap: 2px;
+    margin-bottom: 24px;
+  }
+  .segmented button {
+    appearance: none;
+    border: none;
+    background: transparent;
+    color: var(--text-secondary);
+    font-size: 0.88rem;
+    font-weight: 500;
+    padding: 7px 18px;
+    border-radius: 7px;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  .segmented button.active {
+    background: var(--seq-450);
+    color: #ffffff;
+  }
+  .segmented button:hover:not(.active) {
+    background: var(--chip-bg);
+    color: var(--text-primary);
+  }
+
+  .tiles {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin-bottom: 28px;
+  }
+  .tile {
+    background: var(--surface-1);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px 18px;
+  }
+  .tile .label {
+    font-size: 0.74rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    margin-bottom: 6px;
+  }
+  .tile .value {
+    font-size: 1.7rem;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+  }
+  .tile .sub {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    margin-top: 4px;
+  }
+
+  .period-note {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    background: var(--surface-1);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 10px 16px;
+    margin-bottom: 28px;
+  }
+  .period-note b { color: var(--text-primary); }
+
+  section.panel {
+    background: var(--surface-1);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px 22px 8px;
+    margin-bottom: 24px;
+  }
+  section.panel h2 {
+    font-size: 1rem;
+    margin: 0 0 4px;
+  }
+  section.panel .panel-sub {
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    margin: 0 0 18px;
+  }
+
+  .bar-row {
+    display: grid;
+    grid-template-columns: 26px minmax(0,1fr) 210px 70px;
+    align-items: center;
+    gap: 10px;
+    padding: 6px 0;
+    border-bottom: 1px solid var(--gridline);
+  }
+  .bar-row:last-child { border-bottom: none; }
+  .bar-rank { color: var(--text-muted); font-size: 0.78rem; text-align: right; font-variant-numeric: tabular-nums; }
+  .bar-name {
+    font-size: 0.83rem;
+    color: var(--text-primary);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    cursor: default;
+  }
+  .bar-track {
+    height: 16px;
+    background: var(--gridline);
+    border-radius: 3px;
+    overflow: hidden;
+    position: relative;
+  }
+  .bar-fill {
+    height: 100%;
+    background: var(--seq-450);
+    border-radius: 3px 4px 4px 3px;
+  }
+  .bar-value {
+    font-size: 0.83rem;
+    font-weight: 600;
+    text-align: right;
+    color: var(--good-text);
+    font-variant-numeric: tabular-nums;
+  }
+
+  table.detail {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.82rem;
+    margin-top: 4px;
+  }
+  table.detail th {
+    text-align: left;
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+    color: var(--text-muted);
+    font-weight: 500;
+    padding: 8px 10px;
+    border-bottom: 1px solid var(--baseline);
+    position: sticky;
+    top: 0;
+    background: var(--surface-1);
+  }
+  table.detail td {
+    padding: 8px 10px;
+    border-bottom: 1px solid var(--gridline);
+    color: var(--text-primary);
+    vertical-align: top;
+  }
+  table.detail td.num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  table.detail tr:hover td { background: var(--chip-bg); }
+  .table-scroll { overflow-x: auto; max-height: 560px; overflow-y: auto; }
+  .pos { color: var(--good-text); }
+
+  footer {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    line-height: 1.7;
+    margin-top: 32px;
+    padding-top: 20px;
+    border-top: 1px solid var(--gridline);
+  }
+  footer code {
+    background: var(--chip-bg);
+    padding: 1px 5px;
+    border-radius: 4px;
+    font-size: 0.78rem;
+  }
+
+  @media (max-width: 720px) {
+    .tiles { grid-template-columns: repeat(2, 1fr); }
+    .bar-row { grid-template-columns: 20px minmax(0,1fr) 90px 56px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>Fundos de Ações vs Ibovespa</h1>
+  <p class="subtitle">
+    Sobrevivência e desempenho de fundos de investimento em ações brasileiros nas
+    janelas de 5, 10, 15 e 20 anos, comparados ao Ibovespa no mesmo período.
+  </p>
+
+  <div class="segmented" id="segmented"></div>
+
+  <div class="tiles" id="tiles"></div>
+
+  <div class="period-note" id="periodNote"></div>
+
+  <section class="panel">
+    <h2>Fundos que bateram o Ibovespa pela maior margem</h2>
+    <p class="panel-sub" id="rankingSub"></p>
+    <div id="rankingChart"></div>
+  </section>
+
+  <section class="panel">
+    <h2>Detalhamento</h2>
+    <p class="panel-sub">Mesma lista do gráfico acima, com patrimônio e número de cotistas na data de referência.</p>
+    <div class="table-scroll">
+      <table class="detail">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Fundo</th>
+            <th>Classificação ANBIMA</th>
+            <th class="num">Retorno do fundo</th>
+            <th class="num">Retorno Ibovespa</th>
+            <th class="num">Margem</th>
+            <th class="num">PL atual</th>
+            <th class="num">Cotistas</th>
+          </tr>
+        </thead>
+        <tbody id="tableBody"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <footer id="footer"></footer>
+
+</div>
+
+<script id="dados-analise" type="application/json">{
+  "gerado_em": "2026-08-17 14:55:19",
+  "data_referencia": "2026-08-13",
+  "min_cotistas": 100,
+  "min_patrimonio": 50000000.0,
+  "exclusoes_nome": [
+    "Master"
+  ],
+  "classificacoes_acoes": [
+    "Ações Dividendos",
+    "Ações Indexados",
+    "Ações Índice Ativo",
+    "Ações Livre",
+    "Ações Setoriais",
+    "Ações Small Caps",
+    "Ações Sustentabilidade/Governança",
+    "Ações Valor/Crescimento"
+  ],
+  "universo_registro_classe": 2377,
+  "universo_orfaos_registro_fundo": 5229,
+  "universo_total_geral": 7606,
+  "janelas": {
+    "5": {
+      "janela_anos": 5,
+      "data_referencia": "2026-08-13",
+      "data_inicio_alvo": "2021-08-13",
+      "data_inicio_real": "2021-08-13",
+      "ibov_data_inicio": "2021-08-13",
+      "ibov_data_fim": "2026-08-13",
+      "ibov_retorno": 0.3787918106337993,
+      "universo_total": 7606,
+      "existiam_ha_n_anos": 2729,
+      "sobreviventes_hoje": 1378,
+      "mortalidade_pct": 49.50531330157567,
+      "elegiveis_filtro_porte": 238,
+      "bateram_ibov": 96,
+      "pct_bateram_ibov_elegiveis": 40.33613445378151,
+      "pct_bateram_ibov_total": 3.5177720776841337,
+      "ranking_top20": [
+        {
+          "cnpj": "38351476000140",
+          "nome": "KOKORIKUS FUNDO DE INVESTIMENTO EM AÇÕES",
+          "classificacao": "Ações Livre",
+          "retorno_fundo": 11.727941478668859,
+          "retorno_ibov": 0.3787918106337993,
+          "margem": 11.349149668035059,
+          "bateu": true,
+          "patrim_atual": 77683787.08,
+          "cotistas_atual": 141
+        },
+        {
+          "cnpj": "14632925000160",
+          "nome": "MB FUNDO DE INVESTIMENTO FINANCEIRO EM AÇÕES  INSTITUIÇÕES FINANCEIRAS - RESPONSABILIDADE LIMITADA",
+          "classificacao": "Ações Setoriais",
+          "retorno_fundo": 4.930026414514682,
+          "retorno_ibov": 0.3787918106337993,
+          "margem": 4.551234603880882,
+          "bateu": true,
+          "patrim_atual": 59635866.85,
+          "cotistas_atual": 465
+        },
+        {
+          "cnpj": "36249317000103",
+          "nome": "ITAÚ INDEX US TECH FIF CIC EM AÇÕES RESPONSABILIDADE LIMITADA",
+          "classificacao": "Ações Livre",
+          "retorno_fundo": 2.158306898618158,
+          "retorno_ibov": 0.3787918106337993,
+          "margem": 1.7795150879843589,
+          "bateu": true,
+          "patrim_atual": 1283425254.06,
+          "cotistas_atual": 15906
+        },
+        {
+          "cnpj": "29152427000197",
+          "nome": "ITAÚ US TECH FIF DA CLASSE DE INVESTIMENTO EM COTAS EM AÇÕES RESPONSABILIDADE LIMITADA",
+          "classificacao": "Ações Livre",
+          "retorno_fundo": 2.152108224551237,
+          "retorno_ibov": 0.3787918106337993,
+          "margem": 1.7733164139174376,
+          "bateu": true,
+          "patrim_atual": 131660243.53,
+          "cotistas_atual": 183
+        },
+        {
+          "cnpj": "32319351000156",
+          "nome": "TREND TECNOLOGIA AMERICANA  CLASSE DE INVESTIMENTO EM AÇÕES -  RESPONSABILIDADE LIMITADA",
+          "classificacao": "Ações Indexados",
+          "retorno_fundo": 1.9699064659457117,
+          "retorno_ibov": 0.3787918106337993,
+          "margem": 1.5911146553119124,
+          "bateu": true,
+          "patrim_atual": 386030345.92,
+          "cotistas_atual": 20325
+        },
+        {
+          "cnpj": "36327455000163",
+          "nome": "TREND BOLSA AMERICANA ALAVANCADO FI FINANCEIRO EM AÇÕES - RESPONSABILIDADE LIMITADA",
+          "classificacao": "Ações Livre",
+          "retorno_fundo": 1.8973397368735254,
+          "retorno_ibov": 0.3787918106337993,
+          "margem": 1.5185479262397261,
+          "bateu": true,
+          "patrim_atual": 93447625.06,
+          "cotistas_atual": 1789
+        },
+        {
+          "cnpj": "35002927000145",
+          "nome": "BTGP AQR LONG-BIASED EQUITIES FI FINANCEIRO EM COTAS DE FUNDOS DE INVESTIMENTO EM AÇÕES",
+          "classificacao": "Ações Livre",
+          "retorno_fundo": 1.5201747937888408,
+          "retorno_ibov": 0.3787918106337993,
+          "margem": 1.1413829831550415,
+          "bateu": true,
+          "patrim_atual": 105397474.79,
+          "cotistas_atual": 845
+        },
+        {
+          "cnpj": "31145826000172",
+          "nome": "TREND S&P 500 BRL CLASSE DE INVESTIMENTO EM AÇÕES - RESPONSABILIDADE LIMITADA",
+          "classificacao": "Ações Livre",
+          "retorno_fundo": 1.4087607131671032,
+          "retorno_ibov": 0.3787918106337993,
+          "margem": 1.0299689025333039,
+          "bateu": true,
+          "patrim_atual": 517774758.32,
+          "cotistas_atual": 22856
+        },
+        {
+          "cnpj": "37306536000140",
+          "nome": "ITAÚ INDEX AÇÕES ESTRATÉGIA S&P500 ® FIF DA CLASSE DE INVESTIMENTO EM COTAS RESP LIMITADA",
+          "classificacao": "Ações Livre",
+          "retorno_fundo": 1.3880977459936252,
+          "retorno_ibov": 0.3787918106337993,
+          "margem": 1.009305935359826,
+          "bateu": true,
+          "patrim_atual": 804668391.0,
+          "cotistas_atual": 10839
+        },
+        {
+          "cnpj": "24215286000190",
+          "nome": "SPX FALCON ARMATA ADVISORY FIF CIC EM AÇÕES RESPONSABILIDADE LIMITADA",
+          "classificacao": "Ações Livre",
+          "retorno_fundo": 1.3398189596864611,
+          "retorno_ibov": 0.3787918106337993,
+          "margem": 0.9610271490526618,
+          "bateu": true,
+          "patrim_atual": 181995067.37,
+          "cotistas_atual": 468
+        },
+        {
+          "cnpj": "31341360000180",
+          "nome": "SPX FALCON PVT FUNDO DE INVESTIMENTO FINANCEIRO DA CIC EM AÇÕES RESP LIMITADA",
+          "classificacao": "Ações Livre",
+          "retorno_fundo": 1.312968356672314,
+          "retorno_ibov": 0.3787918106337993,
+          "margem": 0.9341765460385147,
+          "bateu": true,
+          "patrim_atual": 151144853.09,
+          "cotistas_atual": 210
+        },
+        {
+          "cnpj": "18644570000180",
+          "nome": "UBS ALLOCATION SPX FALCON FUNDO DE INVESTIMENTO EM COTAS DE FIF EM AÇÕES  RESPONSABILIDADE LIMITADA",
+          "classificacao": "Ações Livre",
+          "retorno_fundo": 1.3092788321522182,
+          "retorno_ibov": 0.3787918106337993,
+          "margem": 0.9304870215184189,
+          "bateu": true,
+          "patrim_atual": 772073611.22,
+          "cotistas_atual": 240
+        },
+        {
+          "cnpj": "17447468000121",
+          "nome": "BTGP ACCESS SPX FALCON FUNDO DE INVESTIMENTO FINANCEIRO EM QUOTAS DE FUNDOS DE INVESTIMENTO DE AÇÕES",
+          "classificacao": "Ações Livre",
+          "retorno_fundo": 1.3018683843804912,
+          "retorno_ibov": 0.3787918106337993,
+          "margem": 0.9230765737466919,
+          "bateu": true,
+          "patrim_atual": 165304762.31,
+          "cotistas_atual": 297
+        },
+        {
+          "cnpj": "31216976000120",
+          "nome": "SPX FALCON SELEÇÃO AÇÕES FIF DA CLASSE DE INVESTIMENTO EM COTAS RESP LIMITADA",
+          "classificacao": "Ações Livre",
+          "retorno_fundo": 1.2981906890292718,
+          "retorno_ibov": 0.3787918106337993,
+          "margem": 0.9193988783954725,
+          "bateu": true,
+          "patrim_atual": 90276207.78,
+          "cotistas_atual": 732
+        },
+        {
+          "cnpj": "17759799000105",
+          "nome": "ITAÚ AÇÕES ESTRATÉGIA S&P500® FIF DA CLASSE DE INVESTIMENTO EM COTAS RESPONSABILIDADE LIMITADA",
+          "classificacao": "Ações Livre",
+          "retorno_fundo": 1.2654517831307137,
+          "retorno_ibov": 0.3787918106337993,
+          "margem": 0.8866599724969144,
+          "bateu": true,
+          "patrim_atual": 255405040.95,
+          "cotistas_atual": 1907
+        },
+        {
+          "cnpj": "36178569000199",
+          "nome": "BB AÇÕES BOLSA AMERICANA FIF RESPONSABILISADE LIMITADA",
+          "classificacao": "Ações Livre",
+          "retorno_fundo": 1.2192010319433684,
+          "retorno_ibov": 0.3787918106337993,
+          "margem": 0.8404092213095691,
+          "bateu": true,
+          "patrim_atual": 1959964682.89,
+          "cotistas_atual": 20034
+        },
+        {
+          "cnpj": "15350702000172",
+          "nome": "MAAM FUNDO DE INVESTIMENTO EM AÇÕES",
+          "classificacao": "Ações Valor/Crescimento",
+          "retorno_fundo": 1.1384236649680242,
+          "retorno_ibov": 0.3787918106337993,
+          "margem": 0.7596318543342249,
+          "bateu": true,
+          "patrim_atual": 187148905.3,
+          "cotistas_atual": 111
+        },
+        {
+          "cnpj": "22232927000190",
+          "nome": "TARPON GT FUNDO DE INVESTIMENTO FINANCEIRO EM COTAS DE FUNDOS DE INVESTIMENTO EM AÇÕES",
+          "classificacao": "Ações Livre",
+          "retorno_fundo": 1.1182250842325465,
+          "retorno_ibov": 0.3787918106337993,
+          "margem": 0.7394332735987472,
+          "bateu": true,
+          "patrim_atual": 357258994.5,
+          "cotistas_atual": 6123
+        },
+        {
+          "cnpj": "39346123000114",
+          "nome": "TARPON GT INSTITUCIONAL FUNDO DE INVESTIMENTO FINANCEIRO",
+          "classificacao": "Ações Livre",
+          "retorno_fundo": 1.1034528986835719,
+          "retorno_ibov": 0.3787918106337993,
+          "margem": 0.7246610880497726,
+          "bateu": true,
+          "patrim_atual": 1332825755.68,
+          "cotistas_atual": 192
+        },
+        {
+          "cnpj": "37553464000135",
+          "nome": "TREND BOLSAS GLOBAIS CLASSE DE  INVESTIMENTO EM AÇÕES - RESPONSABILIDADE  LIMITADA",
+          "classificacao": "Ações Indexados",
+          "retorno_fundo": 1.1008458893328839,
+          "retorno_ibov": 0.3787918106337993,
+          "margem": 0.7220540786990846,
+          "bateu": true,
+          "patrim_atual": 121151873.64,
+          "cotistas_atual": 11231
+        }
+      ]
+    },
+    "10": {
+      "janela_anos": 10,
+      "data_referencia": "2026-08-13",
+      "data_inicio_alvo": "2016-08-13",
+      "data_inicio_real": "2016-08-12",
+      "ibov_data_inicio": "2016-08-12",
+      "ibov_data_fim": "2026-08-13",
+      "ibov_retorno": 1.8663238876119252,
+      "universo_total": 7606,
+      "existiam_ha_n_anos": 1508,
+      "sobreviventes_hoje": 635,
+      "mortalidade_pct": 57.89124668435013,
+      "elegiveis_filtro_porte": 128,
+      "bateram_ibov": 57,
+      "pct_bateram_ibov_elegiveis": 44.53125,
+      "pct_bateram_ibov_total": 3.7798408488063657,
+      "ranking_top20": [
+        {
+          "cnpj": "14632925000160",
+          "nome": "MB FUNDO DE INVESTIMENTO FINANCEIRO EM AÇÕES  INSTITUIÇÕES FINANCEIRAS - RESPONSABILIDADE LIMITADA",
+          "classificacao": "Ações Setoriais",
+          "retorno_fundo": 15.597192196529114,
+          "retorno_ibov": 1.8663238876119252,
+          "margem": 13.73086830891719,
+          "bateu": true,
+          "patrim_atual": 59635866.85,
+          "cotistas_atual": 465
+        },
+        {
+          "cnpj": "17400251000166",
+          "nome": "ORGANON FUNDO DE INVESTIMENTO FINANCEIRO EM COTAS DE FUNDOS DE INVESTIMENTO EM AÇÕES",
+          "classificacao": "Ações Livre",
+          "retorno_fundo": 12.379822278003815,
+          "retorno_ibov": 1.8663238876119252,
+          "margem": 10.51349839039189,
+          "bateu": true,
+          "patrim_atual": 335364483.19,
+          "cotistas_atual": 1874
+        },
+        {
+          "cnpj": "21689246000192",
+          "nome": "ARBOR FUNDO DE INVESTIMENTO EM COTAS DE FUNDOS DE INVESTIMENTO DE AÇÕES",
+          "classificacao": "Ações Livre",
+          "retorno_fundo": 7.831114787410762,
+          "retorno_ibov": 1.8663238876119252,
+          "margem": 5.964790899798837,
+          "bateu": true,
+          "patrim_atual": 318016222.61,
+          "cotistas_atual": 2795
+        },
+        {
+          "cnpj": "22232927000190",
+          "nome": "TARPON GT FUNDO DE INVESTIMENTO FINANCEIRO EM COTAS DE FUNDOS DE INVESTIMENTO EM AÇÕES",
+          "classificacao": "Ações Livre",
+          "retorno_fundo": 7.799312947684095,
+          "retorno_ibov": 1.8663238876119252,
+          "margem": 5.93298906007217,
+          "bateu": true,
+          "patrim_atual": 357258994.5,
+          "cotistas_atual": 6123
+        },
+        {
+          "cnpj": "17502937000168",
+          "nome": "CAIXA INSTITUCIONAL BDR NÍVEL I FUNDO DE INVESTIMENTO FINANCEIRO EM AÇÕES - RESP LIMITADA",
+          "classificacao": "Ações Livre",
+          "retorno_fundo": 5.779430953699583,
+          "retorno_ibov": 1.8663238876119252,
+          "margem": 3.9131070660876577,
+          "bateu": true,
+          "patrim_atual": 2412213685.1,
+          "cotistas_atual": 343
+        },
+        {
+          "cnpj": "17503172000180",
+          "nome": "CAIXA BDR NÍVEL I FUNDO DE INVESTIMENTO FINANCEIRO EM AÇÕES - RESPONSABILIDADE LIMITADA",
+          "classificacao": "Ações Livre",
+          "retorno_fundo": 5.225207325702783,
+          "retorno_ibov": 1.8663238876119252,
+          "margem": 3.358883438090858,
+          "bateu": true,
+          "patrim_atual": 282280873.44,
+          "cotistas_atual": 3148
+        },
+        {
+          "cnpj": "19831126000136",
+          "nome": "CLASSE ÚNICA DO WESTERN ASSET FUNDO DE INVESTIMENTO FINANCEIRO AÇÕES BDR NÍVEL I - RESP LIMITADA",
+          "classificacao": "Ações Livre",
+          "retorno_fundo": 4.399706101397506,
+          "retorno_ibov": 1.8663238876119252,
+          "margem": 2.5333822137855804,
+          "bateu": true,
+          "patrim_atual": 1226045941.22,
+          "cotistas_atual": 38544
+        },
+        {
+          "cnpj": "10500884000105",
+          "nome": "REAL INVESTOR FIC DE FUNDOS DE INVESTIMENTO FINANCEIRO EM AÇÕES - RESPONSABILIDADE LIMITADA",
+          "classificacao": "Ações Livre",
+          "retorno_fundo": 4.2622731393896185,
+          "retorno_ibov": 1.8663238876119252,
+          "margem": 2.3959492517776932,
+          "bateu": true,
+          "patrim_atual": 2246025785.34,
+          "cotistas_atual": 32753
+        },
+        {
+          "cnpj": "17759799000105",
+          "nome": "ITAÚ AÇÕES ESTRATÉGIA S&P500® FIF DA CLASSE DE INVESTIMENTO EM COTAS RESPONSABILIDADE LIMITADA",
+          "classificacao": "Ações Livre",
+          "retorno_fundo": 4.201898350732334,
+          "retorno_ibov": 1.8663238876119252,
+          "margem": 2.3355744631204085,
+          "bateu": true,
+          "patrim_atual": 255405040.95,
+          "cotistas_atual": 1907
+        },
+        {
+          "cnpj": "22632237000128",
+          "nome": "BB AÇÕES GLOBAIS FIC FIF EM AÇÕES RESPONSABILIDADE LIMITADA",
+          "classificacao": "Ações Livre",
+          "retorno_fundo": 4.0930877755075805,
+          "retorno_ibov": 1.8663238876119252,
+          "margem": 2.2267638878956553,
+          "bateu": true,
+          "patrim_atual": 554648601.89,
+          "cotistas_atual": 8400
+        },
+        {
+          "cnpj": "13401224000157",
+          "nome": "BRADESCO FIF - CIC DE AÇÕES - RESP LIMITADA",
+          "classificacao": "Ações Livre",
+          "retorno_fundo": 3.7976968322114377,
+          "retorno_ibov": 1.8663238876119252,
+          "margem": 1.9313729445995125,
+          "bateu": true,
+          "patrim_atual": 103578701.05,
+          "cotistas_atual": 986
+        },
+        {
+          "cnpj": "20147389000100",
+          "nome": "ITAÚ AÇÕES BDR NÍVEL I FIF DA CLASSE DE INVESTIMENTO EM COTAS RESP LIMITADA",
+          "classificacao": "Ações Livre",
+          "retorno_fundo": 3.7265953356906145,
+          "retorno_ibov": 1.8663238876119252,
+          "margem": 1.8602714480786893,
+          "bateu": true,
+          "patrim_atual": 90218358.24,
+          "cotistas_atual": 993
+        },
+        {
+          "cnpj": "06035405000141",
+          "nome": "GUEPARDO FUNDO DE INVESTIMENTO EM COTAS DE FUNDO DE INVESTIMENTO EM AÇÕES",
+          "classificacao": "Ações Livre",
+          "retorno_fundo": 3.6736581163794213,
+          "retorno_ibov": 1.8663238876119252,
+          "margem": 1.807334228767496,
+          "bateu": true,
+          "patrim_atual": 165506785.51,
+          "cotistas_atual": 109
+        },
+        {
+          "cnpj": "09143435000160",
+          "nome": "GTI DIMONA BRASIL FUNDO DE INVESTIMENTO FINANCEIRO EM AÇÕES - RESPONSABILIDADE LIMITADA",
+          "classificacao": "Ações Valor/Crescimento",
+          "retorno_fundo": 3.4516602353277,
+          "retorno_ibov": 1.8663238876119252,
+          "margem": 1.5853363477157747,
+          "bateu": true,
+          "patrim_atual": 126463252.35,
+          "cotistas_atual": 2144
+        },
+        {
+          "cnpj": "18644570000180",
+          "nome": "UBS ALLOCATION SPX FALCON FUNDO DE INVESTIMENTO EM COTAS DE FIF EM AÇÕES  RESPONSABILIDADE LIMITADA",
+          "classificacao": "Ações Livre",
+          "retorno_fundo": 3.4026016044858434,
+          "retorno_ibov": 1.8663238876119252,
+          "margem": 1.5362777168739181,
+          "bateu": true,
+          "patrim_atual": 772073611.22,
+          "cotistas_atual": 240
+        },
+        {
+          "cnpj": "17447468000121",
+          "nome": "BTGP ACCESS SPX FALCON FUNDO DE INVESTIMENTO FINANCEIRO EM QUOTAS DE FUNDOS DE INVESTIMENTO DE AÇÕES",
+          "classificacao": "Ações Livre",
+          "retorno_fundo": 3.365050899924623,
+          "retorno_ibov": 1.8663238876119252,
+          "margem": 1.4987270123126977,
+          "bateu": true,
+          "patrim_atual": 165304762.31,
+          "cotistas_atual": 297
+        },
+        {
+          "cnpj": "08830947000131",
+          "nome": "GUEPARDO INSTITUCIONAL FUNDO DE INVESTIMENTO FINANCEIRO EM COTAS DE FUNDOS DE INVESTIMENTO EM AÇÕES",
+          "classificacao": "Ações Livre",
+          "retorno_fundo": 3.1689014615763798,
+          "retorno_ibov": 1.8663238876119252,
+          "margem": 1.3025775739644545,
+          "bateu": true,
+          "patrim_atual": 2389310456.2,
+          "cotistas_atual": 16889
+        },
+        {
+          "cnpj": "15350702000172",
+          "nome": "MAAM FUNDO DE INVESTIMENTO EM AÇÕES",
+          "classificacao": "Ações Valor/Crescimento",
+          "retorno_fundo": 3.1163348926489043,
+          "retorno_ibov": 1.8663238876119252,
+          "margem": 1.250011005036979,
+          "bateu": true,
+          "patrim_atual": 187148905.3,
+          "cotistas_atual": 111
+        },
+        {
+          "cnpj": "15334585000153",
+          "nome": "SPX PATRIOT FIF CIC EM AÇÕES RESPONSABILIDADE LIMITADA",
+          "classificacao": "Ações Livre",
+          "retorno_fundo": 2.9553971991248216,
+          "retorno_ibov": 1.8663238876119252,
+          "margem": 1.0890733115128963,
+          "bateu": true,
+          "patrim_atual": 305638468.05,
+          "cotistas_atual": 3920
+        },
+        {
+          "cnpj": "00906044000185",
+          "nome": "TEMPO CAPITAL MANACÁ FIF DA CIC EM AÇÕES RESPONSABILIDADE LIMITADA",
+          "classificacao": "Ações Livre",
+          "retorno_fundo": 2.8812774808528125,
+          "retorno_ibov": 1.8663238876119252,
+          "margem": 1.0149535932408873,
+          "bateu": true,
+          "patrim_atual": 727825844.57,
+          "cotistas_atual": 129
+        }
+      ]
+    },
+    "15": {
+      "janela_anos": 15,
+      "data_referencia": "2026-08-13",
+      "data_inicio_alvo": "2011-08-13",
+      "data_inicio_real": "2011-08-12",
+      "ibov_data_inicio": "2011-08-12",
+      "ibov_data_fim": "2026-08-13",
+      "ibov_retorno": 2.1249593252669574,
+      "universo_total": 7606,
+      "existiam_ha_n_anos": 1432,
+      "sobreviventes_hoje": 361,
+      "mortalidade_pct": 74.79050279329608,
+      "elegiveis_filtro_porte": 80,
+      "bateram_ibov": 52,
+      "pct_bateram_ibov_elegiveis": 65.0,
+      "pct_bateram_ibov_total": 3.6312849162011176,
+      "ranking_top20": [
+        {
+          "cnpj": "11145320000156",
+          "nome": "ATMOS AÇÕES FUNDO DE INVESTIMENTO FINANCEIRO EM COTAS DE FUNDOS DE INVESTIMENTO EM AÇÕES",
+          "classificacao": "Ações Livre",
+          "retorno_fundo": 7.312163444341422,
+          "retorno_ibov": 2.1249593252669574,
+          "margem": 5.187204119074465,
+          "bateu": true,
+          "patrim_atual": 658044242.21,
+          "cotistas_atual": 183
+        },
+        {
+          "cnpj": "12823624000198",
+          "nome": "OCEANA LONG BIASED FIC DE FUNDOS DE INVESTIMENTO FINANCEIRO DE AÇÕES - RESPONSABILIDADE LIMITADA",
+          "classificacao": "Ações Livre",
+          "retorno_fundo": 5.482509496038358,
+          "retorno_ibov": 2.1249593252669574,
+          "margem": 3.357550170771401,
+          "bateu": true,
+          "patrim_atual": 325414025.08,
+          "cotistas_atual": 169
+        },
+        {
+          "cnpj": "73232530000139",
+          "nome": "DYNAMO COUGAR FUNDO DE INVESTIMENTO FINANCEIRO",
+          "classificacao": "Ações Livre",
+          "retorno_fundo": 5.481595643263703,
+          "retorno_ibov": 2.1249593252669574,
+          "margem": 3.3566363179967458,
+          "bateu": true,
+          "patrim_atual": 5416487982.74,
+          "cotistas_atual": 667
+        },
+        {
+          "cnpj": "29544764000120",
+          "nome": "IP PARTICIPAÇÕES FIC DE FIF EM AÇÕES - RESPONSABILIDADE LIMITADA",
+          "classificacao": "Ações Livre",
+          "retorno_fundo": 5.391686394669969,
+          "retorno_ibov": 2.1249593252669574,
+          "margem": 3.2667270694030113,
+          "bateu": true,
+          "patrim_atual": 486530680.23,
+          "cotistas_atual": 523
+        },
+        {
+          "cnpj": "06035405000141",
+          "nome": "GUEPARDO FUNDO DE INVESTIMENTO EM COTAS DE FUNDO DE INVESTIMENTO EM AÇÕES",
+          "classificacao": "Ações Livre",
+          "retorno_fundo": 5.317273956932909,
+          "retorno_ibov": 2.1249593252669574,
+          "margem": 3.1923146316659516,
+          "bateu": true,
+          "patrim_atual": 165506785.51,
+          "cotistas_atual": 109
+        },
+        {
+          "cnpj": "00906044000185",
+          "nome": "TEMPO CAPITAL MANACÁ FIF DA CIC EM AÇÕES RESPONSABILIDADE LIMITADA",
+          "classificacao": "Ações Livre",
+          "retorno_fundo": 4.945947415286567,
+          "retorno_ibov": 2.1249593252669574,
+          "margem": 2.82098809001961,
+          "bateu": true,
+          "patrim_atual": 727825844.57,
+          "cotistas_atual": 129
+        },
+        {
+          "cnpj": "07152170000130",
+          "nome": "XP INVESTOR FIF - CLASSE DE INVESTIMENTO EM COTAS DE AÇÕES - RESP LIMITADA",
+          "classificacao": "Ações Livre",
+          "retorno_fundo": 4.942977536339046,
+          "retorno_ibov": 2.1249593252669574,
+          "margem": 2.8180182110720886,
+          "bateu": true,
+          "patrim_atual": 235404143.2,
+          "cotistas_atual": 1281
+        },
+        {
+          "cnpj": "09143435000160",
+          "nome": "GTI DIMONA BRASIL FUNDO DE INVESTIMENTO FINANCEIRO EM AÇÕES - RESPONSABILIDADE LIMITADA",
+          "classificacao": "Ações Valor/Crescimento",
+          "retorno_fundo": 4.8048314527370275,
+          "retorno_ibov": 2.1249593252669574,
+          "margem": 2.67987212747007,
+          "bateu": true,
+          "patrim_atual": 126463252.35,
+          "cotistas_atual": 2144
+        },
+        {
+          "cnpj": "12082452000149",
+          "nome": "IP PARTICIPAÇÕES IPG FIC DE FIF EM AÇÕES - RESPONSABILIDADE LIMITADA",
+          "classificacao": "Ações Livre",
+          "retorno_fundo": 4.767604588835358,
+          "retorno_ibov": 2.1249593252669574,
+          "margem": 2.6426452635684003,
+          "bateu": true,
+          "patrim_atual": 513491626.18,
+          "cotistas_atual": 21612
+        },
+        {
+          "cnpj": "11392165000172",
+          "nome": "AZ QUEST SMALL MID CAPS FUNDO DE INVESTIMENTO FINANCEIRO DA CIC EM AÇÕES RESP LIMITADA",
+          "classificacao": "Ações Livre",
+          "retorno_fundo": 4.662527973457909,
+          "retorno_ibov": 2.1249593252669574,
+          "margem": 2.5375686481909514,
+          "bateu": true,
+          "patrim_atual": 864389330.97,
+          "cotistas_atual": 1590
+        },
+        {
+          "cnpj": "09285146000103",
+          "nome": "SQUADRA LONG-BIASED FUNDO DE INVESTIMENTO FINANCEIRO EM COTAS DE FUNDOS DE INVESTIMENTO EM AÇÕES",
+          "classificacao": "Ações Livre",
+          "retorno_fundo": 4.601242877653164,
+          "retorno_ibov": 2.1249593252669574,
+          "margem": 2.476283552386207,
+          "bateu": true,
+          "patrim_atual": 676867022.16,
+          "cotistas_atual": 304
+        },
+        {
+          "cnpj": "13401715000106",
+          "nome": "IBIUNA EQUITIES FIF - CLASSE DE INVESTIMENTO EM COTAS DE AÇÕES - RESP LIMITADA",
+          "classificacao": "Ações Livre",
+          "retorno_fundo": 4.361951456769781,
+          "retorno_ibov": 2.1249593252669574,
+          "margem": 2.236992131502823,
+          "bateu": true,
+          "patrim_atual": 270297233.15,
+          "cotistas_atual": 3926
+        },
+        {
+          "cnpj": "12184246000140",
+          "nome": "FUNDAMENTA FI FINANCEIRO - CIA - RESP LIMITADA",
+          "classificacao": "Ações Livre",
+          "retorno_fundo": 4.346472014949404,
+          "retorno_ibov": 2.1249593252669574,
+          "margem": 2.2215126896824464,
+          "bateu": true,
+          "patrim_atual": 167510924.42,
+          "cotistas_atual": 190
+        },
+        {
+          "cnpj": "13106983000197",
+          "nome": "OPPORTUNITY SELECTION FIC DE FUNDOS DE INVESTIMENTO FINANCEIRO EM AÇÕES - RESPONSABILIDADE LIMITADA",
+          "classificacao": "Ações Livre",
+          "retorno_fundo": 4.33848119344525,
+          "retorno_ibov": 2.1249593252669574,
+          "margem": 2.2135218681782924,
+          "bateu": true,
+          "patrim_atual": 97672237.03,
+          "cotistas_atual": 1103
+        },
+        {
+          "cnpj": "08830947000131",
+          "nome": "GUEPARDO INSTITUCIONAL FUNDO DE INVESTIMENTO FINANCEIRO EM COTAS DE FUNDOS DE INVESTIMENTO EM AÇÕES",
+          "classificacao": "Ações Livre",
+          "retorno_fundo": 4.187383924077364,
+          "retorno_ibov": 2.1249593252669574,
+          "margem": 2.062424598810406,
+          "bateu": true,
+          "patrim_atual": 2389310456.2,
+          "cotistas_atual": 16889
+        },
+        {
+          "cnpj": "12565159000132",
+          "nome": "SHARP EQUITY VALUE FEEDER FI FINANCEIRO EM COTAS DE FUNDOS DE INVESTIMENTO FINANCEIRO EM ACOES",
+          "classificacao": "Ações Livre",
+          "retorno_fundo": 4.12776868470185,
+          "retorno_ibov": 2.1249593252669574,
+          "margem": 2.002809359434893,
+          "bateu": true,
+          "patrim_atual": 227420717.35,
+          "cotistas_atual": 224
+        },
+        {
+          "cnpj": "11628883000103",
+          "nome": "OCCAM FI FINANCEIRO - CIC EM AÇÕES - RESP LIMITADA",
+          "classificacao": "Ações Valor/Crescimento",
+          "retorno_fundo": 4.09000646401846,
+          "retorno_ibov": 2.1249593252669574,
+          "margem": 1.9650471387515025,
+          "bateu": true,
+          "patrim_atual": 417003977.52,
+          "cotistas_atual": 461
+        },
+        {
+          "cnpj": "12004203000135",
+          "nome": "EQUITAS SELECTION FUNDO DE INVESTIMENTO EM COTAS DE FIF DE AÇÕES - RESPONSABILIDADE LIMITADA",
+          "classificacao": "Ações Livre",
+          "retorno_fundo": 4.003140944718474,
+          "retorno_ibov": 2.1249593252669574,
+          "margem": 1.8781816194515168,
+          "bateu": true,
+          "patrim_atual": 141827770.28,
+          "cotistas_atual": 7707
+        },
+        {
+          "cnpj": "06916384000173",
+          "nome": "BRADESCO FIF - CLASSE DE INVESTIMENTO EM AÇÕES DIVIDENDOS - RESP LIMITADA",
+          "classificacao": "Ações Dividendos",
+          "retorno_fundo": 3.8571879959631516,
+          "retorno_ibov": 2.1249593252669574,
+          "margem": 1.7322286706961942,
+          "bateu": true,
+          "patrim_atual": 592485380.97,
+          "cotistas_atual": 358
+        },
+        {
+          "cnpj": "01578474000188",
+          "nome": "BB AÇÕES TECNOLOGIA  FUNDO DE INVESTIMENTO  FINANCEIRO RESPONSABILIDADE LIMITADA",
+          "classificacao": "Ações Setoriais",
+          "retorno_fundo": 3.8406077062078827,
+          "retorno_ibov": 2.1249593252669574,
+          "margem": 1.7156483809409253,
+          "bateu": true,
+          "patrim_atual": 368197267.88,
+          "cotistas_atual": 12520
+        }
+      ]
+    },
+    "20": {
+      "janela_anos": 20,
+      "data_referencia": "2026-08-13",
+      "data_inicio_alvo": "2006-08-13",
+      "data_inicio_real": "2006-08-14",
+      "ibov_data_inicio": "2006-08-14",
+      "ibov_data_fim": "2026-08-13",
+      "ibov_retorno": 3.571095032279243,
+      "universo_total": 7606,
+      "existiam_ha_n_anos": 623,
+      "sobreviventes_hoje": 159,
+      "mortalidade_pct": 74.47833065810595,
+      "elegiveis_filtro_porte": 43,
+      "bateram_ibov": 24,
+      "pct_bateram_ibov_elegiveis": 55.81395348837209,
+      "pct_bateram_ibov_total": 3.8523274478330656,
+      "ranking_top20": [
+        {
+          "cnpj": "06035405000141",
+          "nome": "GUEPARDO FUNDO DE INVESTIMENTO EM COTAS DE FUNDO DE INVESTIMENTO EM AÇÕES",
+          "classificacao": "Ações Livre",
+          "retorno_fundo": 17.805322282330383,
+          "retorno_ibov": 3.571095032279243,
+          "margem": 14.234227250051141,
+          "bateu": true,
+          "patrim_atual": 165506785.51,
+          "cotistas_atual": 109
+        },
+        {
+          "cnpj": "73232530000139",
+          "nome": "DYNAMO COUGAR FUNDO DE INVESTIMENTO FINANCEIRO",
+          "classificacao": "Ações Livre",
+          "retorno_fundo": 13.908000333053218,
+          "retorno_ibov": 3.571095032279243,
+          "margem": 10.336905300773974,
+          "bateu": true,
+          "patrim_atual": 5416487982.74,
+          "cotistas_atual": 667
+        },
+        {
+          "cnpj": "00906044000185",
+          "nome": "TEMPO CAPITAL MANACÁ FIF DA CIC EM AÇÕES RESPONSABILIDADE LIMITADA",
+          "classificacao": "Ações Livre",
+          "retorno_fundo": 13.762430445953115,
+          "retorno_ibov": 3.571095032279243,
+          "margem": 10.191335413673873,
+          "bateu": true,
+          "patrim_atual": 727825844.57,
+          "cotistas_atual": 129
+        },
+        {
+          "cnpj": "29544764000120",
+          "nome": "IP PARTICIPAÇÕES FIC DE FIF EM AÇÕES - RESPONSABILIDADE LIMITADA",
+          "classificacao": "Ações Livre",
+          "retorno_fundo": 11.31799073171916,
+          "retorno_ibov": 3.571095032279243,
+          "margem": 7.746895699439917,
+          "bateu": true,
+          "patrim_atual": 486530680.23,
+          "cotistas_atual": 523
+        },
+        {
+          "cnpj": "06916384000173",
+          "nome": "BRADESCO FIF - CLASSE DE INVESTIMENTO EM AÇÕES DIVIDENDOS - RESP LIMITADA",
+          "classificacao": "Ações Dividendos",
+          "retorno_fundo": 8.452393366692972,
+          "retorno_ibov": 3.571095032279243,
+          "margem": 4.881298334413729,
+          "bateu": true,
+          "patrim_atual": 592485380.97,
+          "cotistas_atual": 358
+        },
+        {
+          "cnpj": "07124064000143",
+          "nome": "ACE CAPITAL ABSOLUTO INSTITUCIONAL FIC DE FI FINANCEIRO EM AÇÕES - RESPONSABILIDADE LIMITADA",
+          "classificacao": "Ações Livre",
+          "retorno_fundo": 8.410501884088395,
+          "retorno_ibov": 3.571095032279243,
+          "margem": 4.839406851809152,
+          "bateu": true,
+          "patrim_atual": 60295646.41,
+          "cotistas_atual": 289
+        },
+        {
+          "cnpj": "03168062000103",
+          "nome": "ARX INCOME FIC DE FUNDO DE INVESTIMENTO FINANCEIRO EM AÇÕES - RESPONSABILIDADE LIMITADA",
+          "classificacao": "Ações Dividendos",
+          "retorno_fundo": 7.798839613078618,
+          "retorno_ibov": 3.571095032279243,
+          "margem": 4.227744580799375,
+          "bateu": true,
+          "patrim_atual": 203440544.87,
+          "cotistas_atual": 6793
+        },
+        {
+          "cnpj": "02895694000106",
+          "nome": "FRANKLIN VALOR E LIQUIDEZ FVL FUNDO DE INVESTIMENTO FINANCEIRO EM AÇÕES - RESPONSABILIDADE LIMITADA",
+          "classificacao": "Ações Livre",
+          "retorno_fundo": 7.636662461483596,
+          "retorno_ibov": 3.571095032279243,
+          "margem": 4.065567429204353,
+          "bateu": true,
+          "patrim_atual": 71433230.36,
+          "cotistas_atual": 1926
+        },
+        {
+          "cnpj": "06128183000101",
+          "nome": "JB ALOCAÇÃO LONG ONLY FUNDO DE INVESTIMENTO FINANCEIRO EM AÇÕES - RESPONSABILIDADE LIMITADA",
+          "classificacao": "Ações Livre",
+          "retorno_fundo": 7.398505204950039,
+          "retorno_ibov": 3.571095032279243,
+          "margem": 3.8274101726707963,
+          "bateu": true,
+          "patrim_atual": 141349872.55,
+          "cotistas_atual": 270
+        },
+        {
+          "cnpj": "07279657000189",
+          "nome": "AZ QUEST AÇOES FIF DA CLASSE DE INVESTIMENTOS EM COTAS EM AÇÕES RESP LIMITADA",
+          "classificacao": "Ações Livre",
+          "retorno_fundo": 7.3896692598534806,
+          "retorno_ibov": 3.571095032279243,
+          "margem": 3.8185742275742376,
+          "bateu": true,
+          "patrim_atual": 126942528.46,
+          "cotistas_atual": 1429
+        },
+        {
+          "cnpj": "07663592000170",
+          "nome": "VIC LONG BIASED FIF - CLASSE DE INVESTIMENTO EM AÇÕES - RESP LIMITADA",
+          "classificacao": "Ações Livre",
+          "retorno_fundo": 6.8131141805315485,
+          "retorno_ibov": 3.571095032279243,
+          "margem": 3.2420191482523055,
+          "bateu": true,
+          "patrim_atual": 223870928.2,
+          "cotistas_atual": 263
+        },
+        {
+          "cnpj": "02020528000158",
+          "nome": "BB AÇÕES ENERGIA FUNDO DE INVESTIMENTO FINANCEIRO RESPONSABILIDADE LIMITADA",
+          "classificacao": "Ações Setoriais",
+          "retorno_fundo": 6.213676007563392,
+          "retorno_ibov": 3.571095032279243,
+          "margem": 2.642580975284149,
+          "bateu": true,
+          "patrim_atual": 162492097.94,
+          "cotistas_atual": 7181
+        },
+        {
+          "cnpj": "06916397000142",
+          "nome": "BRADESCO PRIME FIF - CIC DE AÇÕES DIVIDENDOS - RESP LIMITADA",
+          "classificacao": "Ações Dividendos",
+          "retorno_fundo": 5.904181972372009,
+          "retorno_ibov": 3.571095032279243,
+          "margem": 2.333086940092766,
+          "bateu": true,
+          "patrim_atual": 75923846.9,
+          "cotistas_atual": 1196
+        },
+        {
+          "cnpj": "01578474000188",
+          "nome": "BB AÇÕES TECNOLOGIA  FUNDO DE INVESTIMENTO  FINANCEIRO RESPONSABILIDADE LIMITADA",
+          "classificacao": "Ações Setoriais",
+          "retorno_fundo": 5.89351058114482,
+          "retorno_ibov": 3.571095032279243,
+          "margem": 2.3224155488655773,
+          "bateu": true,
+          "patrim_atual": 368197267.88,
+          "cotistas_atual": 12520
+        },
+        {
+          "cnpj": "02887290000162",
+          "nome": "ITAÚ AÇÕES DIVIDENDOS FUNDO DE INVESTIMENTO FINANCEIRO RESPONSABILIDADE LIMITADA",
+          "classificacao": "Ações Dividendos",
+          "retorno_fundo": 5.346583453633062,
+          "retorno_ibov": 3.571095032279243,
+          "margem": 1.7754884213538187,
+          "bateu": true,
+          "patrim_atual": 211350805.99,
+          "cotistas_atual": 142
+        },
+        {
+          "cnpj": "06288668000162",
+          "nome": "ITAÚ PRIVATE MULTI AÇÕES FIF DA CLASSE DE INVESTIMENTO EM COTAS RESPONSABILIDADE LIMITADA",
+          "classificacao": "Ações Índice Ativo",
+          "retorno_fundo": 4.934621005695788,
+          "retorno_ibov": 3.571095032279243,
+          "margem": 1.3635259734165448,
+          "bateu": true,
+          "patrim_atual": 1082938201.03,
+          "cotistas_atual": 1863
+        },
+        {
+          "cnpj": "06988623000109",
+          "nome": "BRADESCO FIF - CLASSE DE  INVESTIMENTO EM AÇÕES MID SMALL CAPS - RESPONSABILIDADE LIMITADA",
+          "classificacao": "Ações Small Caps",
+          "retorno_fundo": 4.270353993649277,
+          "retorno_ibov": 3.571095032279243,
+          "margem": 0.6992589613700337,
+          "bateu": true,
+          "patrim_atual": 195405463.27,
+          "cotistas_atual": 135
+        },
+        {
+          "cnpj": "04222716000194",
+          "nome": "BB AÇÕES MULTIGESTOR PRIVATE FUNDO DE INVESTIMENTO EM COTAS DE FUNDOS DE INVESTIMENTO FINANCEIRO",
+          "classificacao": "Ações Índice Ativo",
+          "retorno_fundo": 4.236956315421205,
+          "retorno_ibov": 3.571095032279243,
+          "margem": 0.6658612831419619,
+          "bateu": true,
+          "patrim_atual": 74051838.45,
+          "cotistas_atual": 318
+        },
+        {
+          "cnpj": "02138442000124",
+          "nome": "BRADESCO H DIVIDENDOS FI FINANCEIRO - CIA - RESP LIMITADA",
+          "classificacao": "Ações Dividendos",
+          "retorno_fundo": 4.1049727918337,
+          "retorno_ibov": 3.571095032279243,
+          "margem": 0.533877759554457,
+          "bateu": true,
+          "patrim_atual": 92434114.48,
+          "cotistas_atual": 182
+        },
+        {
+          "cnpj": "07096546000137",
+          "nome": "ITAÚ CAIXA AÇÕES FUNDO DE INVESTIMENTO FINANCEIRO RESPONSABILIDADE LIMITADA",
+          "classificacao": "Ações Livre",
+          "retorno_fundo": 3.9808307698854355,
+          "retorno_ibov": 3.571095032279243,
+          "margem": 0.40973573760619253,
+          "bateu": true,
+          "patrim_atual": 238503353.41,
+          "cotistas_atual": 496
+        }
+      ]
+    }
+  }
+}</script>
+<script>
+const DATA = JSON.parse(document.getElementById('dados-analise').textContent);
+const JANELAS = [5, 10, 15, 20];
+let janelaAtual = 5;
+
+function fmtPct(x, casas) {
+  casas = casas === undefined ? 1 : casas;
+  return (x * 100).toLocaleString('pt-BR', {minimumFractionDigits: casas, maximumFractionDigits: casas}) + '%';
+}
+function fmtPctPlain(x, casas) {
+  casas = casas === undefined ? 1 : casas;
+  return x.toLocaleString('pt-BR', {minimumFractionDigits: casas, maximumFractionDigits: casas}) + '%';
+}
+function fmtInt(x) {
+  return x.toLocaleString('pt-BR');
+}
+function fmtMoneyMi(x) {
+  return 'R$ ' + (x / 1e6).toLocaleString('pt-BR', {minimumFractionDigits: 1, maximumFractionDigits: 1}) + ' mi';
+}
+function fmtData(iso) {
+  const [y, m, d] = iso.split('-');
+  return d + '/' + m + '/' + y;
+}
+
+function renderSegmented() {
+  const el = document.getElementById('segmented');
+  el.innerHTML = '';
+  JANELAS.forEach(function(n) {
+    const btn = document.createElement('button');
+    btn.textContent = n + ' anos';
+    btn.className = (n === janelaAtual) ? 'active' : '';
+    btn.addEventListener('click', function() {
+      janelaAtual = n;
+      render();
+    });
+    el.appendChild(btn);
+  });
+}
+
+function renderTiles(j) {
+  const el = document.getElementById('tiles');
+  el.innerHTML = '';
+  const tiles = [
+    {
+      label: 'Existiam há ' + j.janela_anos + ' anos',
+      value: fmtInt(j.existiam_ha_n_anos),
+      sub: 'Fundos de ações (universo de ' + fmtInt(j.universo_total) + ')'
+    },
+    {
+      label: 'Sobreviventes hoje',
+      value: fmtInt(j.sobreviventes_hoje),
+      sub: 'Mortalidade na janela: ' + fmtPctPlain(j.mortalidade_pct)
+    },
+    {
+      label: 'Elegíveis p/ comparação',
+      value: fmtInt(j.elegiveis_filtro_porte),
+      sub: '100+ cotistas e PL 50mi+ hoje'
+    },
+    {
+      label: 'Bateram o Ibovespa',
+      value: fmtPctPlain(j.pct_bateram_ibov_total),
+      sub: fmtInt(j.bateram_ibov) + ' de ' + fmtInt(j.existiam_ha_n_anos) + ' que existiam há ' + j.janela_anos + ' anos' +
+        ' (' + fmtPctPlain(j.pct_bateram_ibov_elegiveis) + ' se olhar só os ' + fmtInt(j.elegiveis_filtro_porte) + ' elegíveis sobreviventes)'
+    }
+  ];
+  tiles.forEach(function(t) {
+    const div = document.createElement('div');
+    div.className = 'tile';
+    div.innerHTML = '<div class="label">' + t.label + '</div>' +
+      '<div class="value">' + t.value + '</div>' +
+      '<div class="sub">' + t.sub + '</div>';
+    el.appendChild(div);
+  });
+}
+
+function renderPeriodNote(j) {
+  const el = document.getElementById('periodNote');
+  el.innerHTML = 'Período: <b>' + fmtData(j.data_inicio_real) + '</b> a <b>' + fmtData(j.data_referencia) +
+    '</b> &middot; Ibovespa no período: <b>' + fmtPct(j.ibov_retorno) + '</b>';
+}
+
+function renderRanking(j) {
+  const sub = document.getElementById('rankingSub');
+  const n = j.ranking_top20.length;
+  sub.textContent = n === 0
+    ? 'Nenhum fundo elegível bateu o Ibovespa nesta janela.'
+    : 'Top ' + n + ' fundo(s) elegível(is) (100+ cotistas, PL 50mi+) que bateram o índice, por margem de retorno — ' +
+      'a exceção, não a regra: são só ' + fmtPctPlain(j.pct_bateram_ibov_total) + ' de tudo que existia há ' + j.janela_anos + ' anos.';
+
+  const chart = document.getElementById('rankingChart');
+  chart.innerHTML = '';
+  if (n === 0) return;
+
+  const maxMargem = Math.max.apply(null, j.ranking_top20.map(function(f) { return f.margem; }));
+
+  j.ranking_top20.forEach(function(f, i) {
+    const row = document.createElement('div');
+    row.className = 'bar-row';
+    const pct = Math.max(2, (f.margem / maxMargem) * 100);
+    row.innerHTML =
+      '<div class="bar-rank">' + (i + 1) + '</div>' +
+      '<div class="bar-name" title="' + f.nome.replace(/"/g, '&quot;') + '">' + f.nome + '</div>' +
+      '<div class="bar-track"><div class="bar-fill" style="width:' + pct.toFixed(1) + '%"></div></div>' +
+      '<div class="bar-value">+' + fmtPctPlain(f.margem * 100, 0) + '</div>';
+    chart.appendChild(row);
+  });
+}
+
+function renderTable(j) {
+  const body = document.getElementById('tableBody');
+  body.innerHTML = '';
+  j.ranking_top20.forEach(function(f, i) {
+    const tr = document.createElement('tr');
+    tr.innerHTML =
+      '<td>' + (i + 1) + '</td>' +
+      '<td>' + f.nome + '</td>' +
+      '<td>' + f.classificacao + '</td>' +
+      '<td class="num pos">' + fmtPct(f.retorno_fundo) + '</td>' +
+      '<td class="num">' + fmtPct(f.retorno_ibov) + '</td>' +
+      '<td class="num pos">+' + fmtPct(f.margem) + '</td>' +
+      '<td class="num">' + fmtMoneyMi(f.patrim_atual) + '</td>' +
+      '<td class="num">' + fmtInt(f.cotistas_atual) + '</td>';
+    body.appendChild(tr);
+  });
+}
+
+function renderFooter() {
+  const el = document.getElementById('footer');
+  el.innerHTML =
+    '<div><b>Fonte dos dados:</b> base CVM (tabelas <code>FUNDOS</code>, <code>registro_classe</code> e ' +
+    '<code>registro_fundo</code>, carteiraz.db) e cotações diárias do Ibovespa (Economatica). Data de referência ' +
+    '("hoje"): <b>' + fmtData(DATA.data_referencia) + '</b> (último dia com cobertura completa de reporte de cotas na base).</div>' +
+    '<div style="margin-top:6px;"><b>Universo:</b> fundos classificados pela ANBIMA (via <code>registro_classe</code>) como ' +
+    DATA.classificacoes_acoes.join(', ') + ' — ' + fmtInt(DATA.universo_registro_classe) + ' fundos.</div>' +
+    '<div style="margin-top:6px;"><b>Fundos "órfãos" (via <code>registro_fundo</code>):</b> ' + fmtInt(DATA.universo_orfaos_registro_fundo) +
+    ' fundos adicionais que não têm nenhum registro em <code>registro_classe</code> (a tabela de "Classes" da RCVM 175 ' +
+    'não migrou fundos já cancelados antes de ~2023, mesmo cancelamentos recentes) e foram identificados por heurística: ' +
+    'nome contendo "ações" e tipo de fundo financeiro tradicional (FMIA, FMIA-CL, FI, FIF, FITVM). Como não têm classificação ' +
+    'ANBIMA, entram na contagem de fundos existentes/mortalidade e no denominador da % que bateu o Ibovespa, mas nunca no ' +
+    'numerador nem no ranking (nenhum deles sobreviveu até a data de referência). Universo total: ' +
+    fmtInt(DATA.universo_total_geral) + ' fundos.</div>' +
+    '<div style="margin-top:6px;"><b>Exclusão por nome:</b> ' + DATA.exclusoes_nome.join(', ') + '.</div>' +
+    '<div style="margin-top:6px;"><b>Filtro de porte</b> (aplicado apenas para decidir quem entra no numerador da % que ' +
+    'bateu o Ibovespa e no ranking; não afeta a contagem de mortalidade): mínimo ' + DATA.min_cotistas + ' cotistas e PL ' +
+    'atual de ' + fmtMoneyMi(DATA.min_patrimonio) + ', ambos na data de referência.</div>' +
+    '<div style="margin-top:6px;"><b>Por que dois percentuais de "bateu o Ibovespa":</b> calcular a % só entre os ' +
+    'sobreviventes elegíveis de hoje sofre viés de sobrevivência — fundos que fecharam no meio do caminho simplesmente ' +
+    'somem da conta, inflando o resultado. O número em destaque nos cartões (e usado no gráfico de exceções) divide pelo ' +
+    'total de fundos que existiam no início da janela: um fundo que fechou ou que sobreviveu mas ficou pequeno demais ' +
+    'conta como "não bateu". O número entre parênteses (só entre elegíveis) fica para referência/contexto.</div>' +
+    '<div style="margin-top:6px;"><b>Metodologia:</b> "existir" = ter cota (VL_QUOTA) registrada na data. Retorno do fundo ' +
+    'e do Ibovespa calculados entre a data de início da janela e a data de referência, usando os dias de pregão ' +
+    'efetivamente disponíveis mais próximos das datas-alvo.</div>' +
+    '<div style="margin-top:6px;">Gerado em ' + DATA.gerado_em + '.</div>';
+}
+
+function render() {
+  const j = DATA.janelas[String(janelaAtual)];
+  renderSegmented();
+  renderTiles(j);
+  renderPeriodNote(j);
+  renderRanking(j);
+  renderTable(j);
+}
+
+renderFooter();
+render();
+</script>
+</body>
+</html>
